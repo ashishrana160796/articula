@@ -3,6 +3,7 @@ data/informaticup-test-dataset/*
 pre-trained-models/*
 trained-models/*
 data/intrinsic-dim-dataset/*
+data/transformed-model-input-datasets/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
