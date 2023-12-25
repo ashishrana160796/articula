@@ -7,4 +7,4 @@ This repository presents implementation for the tool Articula: AI-generated Cont
 1. For setting up the project, use the `source project-setup.sh` command, and it will set up a virtual environment with prerequisite packages.
 
 
-___Important Note:__ Create a specific branch named in the format like `feature/intrinsic-dimension-model`, highlighting the name of the feature model in progress and make a pull request. Please, do not push directly onto the main branch as your changes won't be accepted, and also add another person as reviewer of your code.
+__Important Note:__ Create a specific branch named in the format like `feature/intrinsic-dimension-model`, highlighting the name of the feature model in progress and make a pull request. Please, do not push directly onto the main branch as your changes won't be accepted, and also add another person as reviewer of your code.
