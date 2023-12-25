@@ -1,3 +1,9 @@
+# data and pre-trained/trained models ignored for being committed into the repository
+data/informaticup-test-dataset/*
+pre-trained-models/*
+trained-models/*
+data/intrinsic-dim-dataset/*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
