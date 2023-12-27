@@ -1,3 +1,6 @@
+# no upload of prototyping jupyter notebooks in the main branch
+*.ipynb
+
 # data and pre-trained/trained models ignored for being committed into the repository
 data/informaticup-test-dataset/*
 pre-trained-models/*

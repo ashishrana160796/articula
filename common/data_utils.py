@@ -3,14 +3,14 @@ import random
 import pandas as pd
 from tqdm import tqdm
 from pathlib import Path
-from typing import Union, Optional
+from typing import Optional
 from common import constants as const
 
-random.seed(42) # fixing the random seed for retrieving fixed data subset
+random.seed(16) # fixing the random seed for retrieving fixed data subset
 
-def load_intrinsic_dim_dataset(data_path: Union[str, Path], subset_fraction: Optional[float]=1.):
+def load_intrinsic_dim_dataset(data_path: str | Path, subset_fraction: Optional[float]=1.):
     """
-    Loads data subset for the intrinsic dimension dataset,
+    It loads data subset for the intrinsic dimension dataset,
     with additional feature to load fraction of data subsets.
     """
     if not isinstance(data_path, Path):
@@ -51,4 +51,10 @@ def load_intrinsic_dim_dataset(data_path: Union[str, Path], subset_fraction: Opt
     trasformed_data_df.to_csv(Path(const.TRANSFORMED_DATA_SAVE_PATH) / "transformed_intrinsic_dim_data.csv", index=False)
 
 if __name__ == '__main__':
+    sample_text = "Speaking of festivities, there is one day in China that stands unrivaled - \
+                   the first day of the Lunar New Year, commonly referred to as the Spring Festival. \
+                   Even if you're generally uninterested in celebratory events, it's hard to resist the \
+                   allure of the family reunion dinner, a quintessential aspect of the Spring Festival. \
+                   Throughout the meal, family members raise their glasses to toast one another, expressing wishes \
+                   for happiness, peace, health, and prosperity in the upcoming year."
     load_intrinsic_dim_dataset(const.INTRINSIC_DIM_DATASET, subset_fraction=.025)
