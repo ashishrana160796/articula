@@ -78,7 +78,7 @@ def intrinsic_dim_dataset_to_files(data_path: str | Path, subset_fraction: Optio
             json_list = json.load(json_data_file)
             IDX_VAL = 1
             for json_value in json_list:
-                with open(human_data_path / f"{dataset_ext_list[0]}_{IDX_VAL}_", "w") as f:
+                with open(human_data_path / f"{dataset_ext_list[0]}_{IDX_VAL}_{dataset_ext_list[1]}", "w") as f:
                     f.write(json_value['prefix']+" "+json_value['gold_completion'])
                 with open(ai_data_path / f"{dataset_ext_list[1]}_{IDX_VAL}", "w") as f:
                     f.write(json_value['prefix']+" "+ ''.join(json_value['gen_completion']))
