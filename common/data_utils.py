@@ -17,18 +17,27 @@ def intrinsic_dim_dataset_to_csv(data_path: str | Path, subset_fraction: Optiona
     if not isinstance(data_path, Path):
         data_path = Path(data_path)
     dataset_file_paths = [entity for entity in data_path.glob('**/*') if entity.is_file()]
-    
-    human_text_data_values, human_text_split_values = [], []
-    ai_gen_text_data_values, ai_gen_text_split_values = [], []
-    for dataset_file_path in tqdm(dataset_file_paths):
+
+    dataset_file_paths_dict = OrderedDict()
+    for file in dataset_file_paths:
+        dataset_file_paths_dict[file] = file.name.split(".")[0].split("_")
+
+    human_text_data_values, human_text_split_values, human_text_generator_values, human_text_source_values = [], [], [], []
+    ai_gen_text_data_values, ai_gen_text_split_values, ai_gen_text_generator_values, ai_gen_text_source_values = [], [], [], []
+
+    for (dataset_file_path, dataset_ext_list) in tqdm(dataset_file_paths_dict.items()):
         with open(dataset_file_path) as json_data_file:
             json_list = json.load(json_data_file)
             json_list = random.sample(json_list, int(subset_fraction*len(json_list)))
             for json_value in json_list:
                 human_text_data_values.append(json_value['prefix']+" "+json_value['gold_completion'])
                 human_text_split_values.append(json_value['split'])
+                human_text_generator_values.append(dataset_ext_list[0])
+                human_text_source_values.append(dataset_ext_list[-1])
                 ai_gen_text_data_values.append(json_value['prefix']+" "+ ''.join(json_value['gen_completion']))
                 ai_gen_text_split_values.append(json_value['split'])
+                ai_gen_text_generator_values.append(dataset_ext_list[1])
+                ai_gen_text_source_values.append(dataset_ext_list[-1])
 
     human_text_flag_values = [const.HUMAN_TEXT_STR]*len(human_text_data_values)
     ai_gen_text_flag_values = [const.AI_GENERATED_TEXT_STR]*len(ai_gen_text_data_values)
@@ -37,6 +46,8 @@ def intrinsic_dim_dataset_to_csv(data_path: str | Path, subset_fraction: Optiona
         {
             
             'text_data' : human_text_data_values,
+            'generator': human_text_generator_values,
+            'data_source': human_text_source_values,
             'data_split' : human_text_split_values,
             'target_class': human_text_flag_values,
         })
@@ -44,6 +55,8 @@ def intrinsic_dim_dataset_to_csv(data_path: str | Path, subset_fraction: Optiona
         {
             
             'text_data' : ai_gen_text_data_values,
+            'generator': ai_gen_text_generator_values,
+            'data_source': ai_gen_text_source_values,
             'data_split' : ai_gen_text_split_values,
             'target_class': ai_gen_text_flag_values,
         })
@@ -85,5 +98,5 @@ def intrinsic_dim_dataset_to_files(data_path: str | Path, subset_fraction: Optio
                 IDX_VAL += 1
 
 if __name__ == '__main__':
-    # intrinsic_dim_dataset_to_csv(const.INTRINSIC_DIM_DATASET, subset_fraction=1.)
-    intrinsic_dim_dataset_to_files(const.INTRINSIC_DIM_DATASET)
+    intrinsic_dim_dataset_to_csv(const.INTRINSIC_DIM_DATASET)
+    # intrinsic_dim_dataset_to_files(const.INTRINSIC_DIM_DATASET)
