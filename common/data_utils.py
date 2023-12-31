@@ -9,7 +9,7 @@ from common import constants as const
 
 random.seed(16) # fixing the random seed for retrieving fixed data subset
 
-def intrinsic_dim_dataset_to_csv(data_path: str | Path, subset_fraction: Optional[float]=1.):
+def intrinsic_dim_dataset_to_csv(data_path: str | Path, subset_fraction: Optional[float]=1., include_prompt: bool=False):
     """
     It loads data subset for the intrinsic dimension dataset into a single csv file,
     with additional feature to load fraction of data subsets.
@@ -30,11 +30,17 @@ def intrinsic_dim_dataset_to_csv(data_path: str | Path, subset_fraction: Optiona
             json_list = json.load(json_data_file)
             json_list = random.sample(json_list, int(subset_fraction*len(json_list)))
             for json_value in json_list:
-                human_text_data_values.append(json_value['prefix']+" "+json_value['gold_completion'])
+                if include_prompt:
+                    human_text_data_values.append(json_value['prefix']+" "+json_value['gold_completion'])
+                else:
+                    human_text_data_values.append(json_value['gold_completion'])
                 human_text_split_values.append(json_value['split'])
                 human_text_generator_values.append(dataset_ext_list[0])
                 human_text_source_values.append(dataset_ext_list[-1])
-                ai_gen_text_data_values.append(json_value['prefix']+" "+ ''.join(json_value['gen_completion']))
+                if include_prompt:
+                    ai_gen_text_data_values.append(json_value['prefix']+" "+ ''.join(json_value['gen_completion']))
+                else:
+                    ai_gen_text_data_values.append(''.join(json_value['gen_completion']))
                 ai_gen_text_split_values.append(json_value['split'])
                 ai_gen_text_generator_values.append(dataset_ext_list[1])
                 ai_gen_text_source_values.append(dataset_ext_list[-1])
