@@ -18,4 +18,4 @@ def calculate_intrinsic_dim_estimates(data_path: str | Path, save_path: str | Pa
     intrinsic_dim_df.to_csv(Path(save_path) / file_name, index=False)
 
 if __name__ == '__main__':
-    calculate_intrinsic_dim_estimates(const.INTRINSIC_DIM_DATASET, const.TRANSFORMED_DATA_SAVE_PATH, const.TRANSFORMED_DATA_CSV_NAME, 0.0625)
+    calculate_intrinsic_dim_estimates(const.INTRINSIC_DIM_DATASET, const.TRANSFORMED_DATA_SAVE_PATH, const.TRANSFORMED_DATA_CSV_NAME, 0.125)
