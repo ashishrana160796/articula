@@ -62,7 +62,7 @@ def intrinsic_dim_dataset_to_csv(data_path: str | Path, subset_fraction: Optiona
         })
     
     trasformed_data_df = pd.concat([human_text_data_df, ai_gen_text_data_df], axis=0)
-    trasformed_data_df.to_csv(Path(const.TRANSFORMED_DATA_SAVE_PATH) / "transformed_intrinsic_dim_data.csv", index=False)
+    trasformed_data_df.to_csv(Path(const.TRANSFORMED_DATA_SAVE_PATH) / const.TRANSFORMED_DATA_CSV_NAME, index=False)
 
 
 def intrinsic_dim_dataset_to_files(data_path: str | Path, subset_fraction: Optional[float]=1.):
