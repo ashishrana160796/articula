@@ -7,8 +7,8 @@ import numpy as np
 import tiktoken
 import dill as pickle
 
-from common.ghostbusters_featurize import *
-from common.ngram import *
+from utils.featurize import *
+from utils.n_gram import *
 
 from collections import Counter, defaultdict
 from sklearn.linear_model import LogisticRegression

@@ -14,31 +14,34 @@ from tabulate import tabulate
 from common.ghostbusters_featurize import normalize, t_featurize, select_features
 from common.ghostbusters_symbolic import get_all_logprobs, train_trigram, get_exp_featurize
 from common.ghostbusters_symbolic import generate_symbolic_data
-from common.ghostbusters_load import get_generate_dataset, Dataset
+from utils.load import get_generate_dataset, Dataset
 
-best_features_path = "results/gb_best_features_three.txt" 
-if os.path.exists(best_features_path):
-    with open(best_features_path) as f:
-        best_features = f.read().strip().split("\n")
+with open("results/best_features_three.txt") as f:
+    best_features = f.read().strip().split("\n")
 
-trigram_model_path = "models/trigram_model.pkl"
+trigram_model_path = "model/trigram_model.pkl"
 if not os.path.exists(trigram_model_path):
     print("Training trigram model...")
     trigram_model, tokenizer = train_trigram(verbose=True, return_tokenizer=True)
 else:
     print("Loading trigram model...")
     trigram_model = pickle.load(
-        open(trigram_model_path, "rb"), pickle.HIGHEST_PROTOCOL)
+        open("model/trigram_model.pkl", "rb"), pickle.HIGHEST_PROTOCOL)
     tokenizer = tiktoken.encoding_for_model("davinci").encode
 
-reddit_dataset = [
-    Dataset("normal", "data/transformed-model-input-datasets/intrinsic_dim_data/reddit/human"),
-    Dataset("normal", "data/transformed-model-input-datasets/intrinsic_dim_data/reddit/ai"),
+wp_dataset = [
+    Dataset("normal", "data/wp/human"),
+    Dataset("normal", "data/wp/gpt"),
 ]
 
-wikip_dataset = [
-    Dataset("normal", "data/transformed-model-input-datasets/intrinsic_dim_data/wikip/human"),
-    Dataset("normal", "data/transformed-model-input-datasets/intrinsic_dim_data/wikip/ai"),
+reuter_dataset = [
+    Dataset("author", "data/reuter/human"),
+    Dataset("author", "data/reuter/gpt"),
+]
+
+essay_dataset = [
+    Dataset("normal", "data/essay/human"),
+    Dataset("normal", "data/essay/gpt"),
 ]
 
 eval_dataset = [
@@ -92,8 +95,9 @@ if __name__ == "__main__":
     result_table = [["F1", "Accuracy", "AUC"]]
 
     datasets = [
-        *reddit_dataset,
-        *wikip_dataset]
+        *wp_dataset,
+        *reuter_dataset,
+        *essay_dataset]
     
     generate_dataset_fn = get_generate_dataset(*datasets)
 
@@ -121,7 +125,7 @@ if __name__ == "__main__":
         t_data_eval = generate_dataset_fn_eval(t_featurize)
         pickle.dump(t_data_eval, open("t_data_eval", "wb"))
     
-    labels = generate_dataset_fn(lambda file: 1 if any([m in file for m in ["ai"]]) else 0)
+    labels = generate_dataset_fn(lambda file: 1 if any([m in file for m in ["gpt", "claude"]]) else 0)
     indices = np.arange(len(labels))
     np.random.shuffle(indices)
     train, test = (
@@ -133,34 +137,41 @@ if __name__ == "__main__":
     print(f"Positive Labels: {sum(labels[indices])}, Total Labels: {len(indices)}")
 
     if args.perform_feature_selection:
-        print("Peforming Feature Selection...")
         exp_to_data = pickle.load(open("symbolic_data_gpt", "rb"))
         best_features = select_features(
             exp_to_data, labels, verbose=True, to_normalize=True, indices=train
         )
 
-        with open("results/gb_best_features_three.txt", "w") as f:
+        with open("results/best_features_three.txt", "w") as f:
             for feat in best_features:
                 f.write(feat + "\n")
 
     if args.perform_feature_selection_domain:
         exp_to_data = pickle.load(open("symbolic_data_gpt", "rb"))
 
-        reddit_indices = np.where(generate_dataset_fn(lambda file: "reddit" in file))[0]
-        wikip_indices = np.where(generate_dataset_fn(lambda file: "wikip" in file))[0]
+        wp_indices = np.where(generate_dataset_fn(lambda file: "wp" in file))[0]
+        reuter_indices = np.where(generate_dataset_fn(lambda file: "reuter" in file))[0]
+        essay_indices = np.where(generate_dataset_fn(lambda file: "essay" in file))[0]
 
-        reddit_features = select_features(
-            exp_to_data, labels, verbose = True, to_normalize = True, indices=reddit_indices
+        wp_features = select_features(
+            exp_to_data, labels, verbose = True, to_normalize = True, indices=wp_indices
         )
-        with open("results/gb_best_features_reddit.txt", "w") as f:
-            for feat in reddit_features:
+        with open("results/best_features_wp.txt", "w") as f:
+            for feat in wp_features:
                 f.write(feat + "\n")
 
-        wikip_features = select_features(
-            exp_to_data, labels, verbose=True, to_normalize=True, indices=wikip_indices
+        reuter_features = select_features(
+            exp_to_data, labels, verbose=True, to_normalize=True, indices=reuter_indices
         )
-        with open("results/gb_best_features_wikip.txt", "w") as f:
-            for feat in wikip_features:
+        with open("results/best_features_reuter.txt", "w") as f:
+            for feat in reuter_features:
+                f.write(feat + "\n")
+
+        essay_features = select_features(
+            exp_to_data, labels, verbose=True, to_normalize=True, indices=essay_indices
+        )
+        with open("results/best_features_essay.txt", "w") as f:
+            for feat in essay_features:
                 f.write(feat + "\n")
     
     data, mu, sigma = normalize(
@@ -176,12 +187,12 @@ if __name__ == "__main__":
     if args.train_on_all_data:
         model.fit(data, labels)
 
-        with open("models/gb_features.txt", "w") as f:
+        with open("model/features.txt", "w") as f:
             for feat in best_features:
                 f.write(feat + "\n")
-        pickle.dump(model, open("models/gb_model", "wb"))
-        pickle.dump(mu, open("models/gb_mu", "wb"))
-        pickle.dump(sigma, open("models/gb_sigma", "wb"))
+        pickle.dump(model, open("model/model", "wb"))
+        pickle.dump(mu, open("model/mu", "wb"))
+        pickle.dump(sigma, open("model/sigma", "wb"))
         pickle.dump(trigram_model, open(trigram_model_path, "wb"))
 
         print("Saved model to model/")
