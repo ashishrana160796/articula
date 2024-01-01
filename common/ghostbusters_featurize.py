@@ -2,7 +2,7 @@ import numpy as np
 import os
 import tqdm
 from nltk import ngrams
-from utils.score import k_fold_score
+from common.score import k_fold_score
 
 
 def get_logprobs(file):
