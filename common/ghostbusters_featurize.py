@@ -2,7 +2,7 @@ import numpy as np
 import os
 import tqdm
 from nltk import ngrams
-from common.score import k_fold_score
+from utils.score import k_fold_score
 
 
 def get_logprobs(file):
@@ -109,12 +109,12 @@ def convert_file_to_logprob_file(file_name, model):
 
     return logprob_file_path
 
-#Here the function actually is just creating a featurized vector using 2 model log probs. Not sure where it was used again. Will check.
-def t_featurize_logprobs(xlmr_logprobs, db_logprobs, tokens):
+
+def t_featurize_logprobs(davinci_logprobs, ada_logprobs, tokens):
     X = []
 
     outliers = []
-    for logprob in xlmr_logprobs:
+    for logprob in davinci_logprobs:
         if logprob > 3:
             outliers.append(logprob)
 
@@ -123,7 +123,7 @@ def t_featurize_logprobs(xlmr_logprobs, db_logprobs, tokens):
     X.append(np.mean(outliers[:25]))
     X.append(np.mean(outliers[25:50]))
 
-    diffs = sorted(xlmr_logprobs - db_logprobs, reverse=True)
+    diffs = sorted(davinci_logprobs - ada_logprobs, reverse=True)
     diffs += [0] * (50 - min(50, len(diffs)))
     X.append(np.mean(diffs[:25]))
     X.append(np.mean(diffs[25:]))
@@ -136,18 +136,18 @@ def t_featurize_logprobs(xlmr_logprobs, db_logprobs, tokens):
     return X
 
 
-def t_featurize(file, num_tokens=1024):
+def t_featurize(file, num_tokens=2048):
     """
     Manually handcrafted features for classification.
     """
-    xlmr_file = convert_file_to_logprob_file(file, "xlmr")
-    db_file = convert_file_to_logprob_file(file, "db")
+    davinci_file = convert_file_to_logprob_file(file, "davinci")
+    ada_file = convert_file_to_logprob_file(file, "ada")
 
-    xlmr_logprobs = get_logprobs(xlmr_file)[:num_tokens]
-    db_logprobs = get_logprobs(db_file)[:num_tokens]
-    tokens = get_tokens(xlmr_file)[:num_tokens]
+    davinci_logprobs = get_logprobs(davinci_file)[:num_tokens]
+    ada_logprobs = get_logprobs(ada_file)[:num_tokens]
+    tokens = get_tokens(davinci_file)[:num_tokens]
 
-    return t_featurize_logprobs(xlmr_logprobs, db_logprobs, tokens)
+    return t_featurize_logprobs(davinci_logprobs, ada_logprobs, tokens)
 
 
 def select_features(exp_to_data, labels, verbose=True, to_normalize=True, indices=None):
