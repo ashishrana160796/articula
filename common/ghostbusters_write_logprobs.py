@@ -23,7 +23,7 @@ def write_logprobs_gpt2(text, file):
     token_log_probs = []
     for i, input_id in enumerate(tokens["input_ids"][0]):
         token_log_prob = log_probs[0, i, input_id].item()
-        token_text = tokenizer.decode([input_id])
+        token_text = tokenizer_gpt2.decode([input_id])
         for k, v in gpt2_map.items():
             token_text = token_text.replace(k, v)
 
