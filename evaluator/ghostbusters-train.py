@@ -14,7 +14,7 @@ from tabulate import tabulate
 from common.ghostbusters_featurize import normalize, t_featurize, select_features
 from common.ghostbusters_symbolic import get_all_logprobs, train_trigram, get_exp_featurize
 from common.ghostbusters_symbolic import generate_symbolic_data
-from utils.load import get_generate_dataset, Dataset
+from common.ghostbusters_load import get_generate_dataset, Dataset
 
 with open("results/best_features_three.txt") as f:
     best_features = f.read().strip().split("\n")
