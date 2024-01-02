@@ -1,3 +1,4 @@
+import re
 import json
 import random
 import pandas as pd
@@ -8,6 +9,26 @@ from collections import OrderedDict
 from common import constants as const
 
 random.seed(16) # fixing the random seed for retrieving fixed data subset
+
+
+def preprocess_text(text: str):
+    """
+    It clear text from linebreaks and odd whitespaces, because they seem to interfere with the LM.
+    As a possible improvement, feel free to replace it with a more sophisticated cleaner.
+    """
+    _RE_COMBINE_WHITESPACE = re.compile(r"\s+")
+    return _RE_COMBINE_WHITESPACE.sub(" ", text.replace('\n', ' ')).strip() 
+
+
+def load_informaticup_text_data():
+    data_list = []
+    file_path_list = [file for file in Path(const.INFORMATICUP_TEXT_DATASET).glob('**/*')]
+    for file_path in file_path_list:
+        with open(file_path, 'r') as file:
+            text_data = file.read()
+            data_list.append(preprocess_text(text_data))
+    return data_list
+
 
 def intrinsic_dim_dataset_to_csv(data_path: str | Path, subset_fraction: Optional[float]=1., include_prompt: bool=False):
     """

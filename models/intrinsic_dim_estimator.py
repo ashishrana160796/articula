@@ -17,8 +17,10 @@ from skdim.id import MLE
 from tqdm import tqdm
 from typing import Callable, List
 
-from common.intrinsic_dim_utils import PHD, preprocess_text
+from common.data_utils import preprocess_text
+from common.intrinsic_dim_utils import PHD
 from common import constants as const
+from common.data_utils import load_informaticup_text_data
 from common.language_model_utils import LanguageDetector
 
 class IntrinsicDimensionEstimator():
@@ -69,7 +71,7 @@ class IntrinsicDimensionEstimator():
         self.tokenizer = RobertaTokenizer.from_pretrained(self.model_name, cache_dir=self.model_path)
         self.model = RobertaModel.from_pretrained(self.model_name, cache_dir=self.model_path)
         self.lang_detector = LanguageDetector(self.data)
-        self.lang_lists = list(self.lang_detector.detect_language().keys())
+        self.lang_lists = self.lang_detector.detect_language()
 
     def _get_phd_single(self, text, solver):
         inputs = self.tokenizer(preprocess_text(text), truncation=True, max_length=512, return_tensors="pt")
@@ -136,19 +138,14 @@ class IntrinsicDimensionEstimator():
         return np.array(dims).reshape(-1, 1)
     
 if __name__ == '__main__':
-    # evaluating intrinsic dimensions over a sample text
-    input_text = "Speaking of festivities, there is one day in China that stands unrivaled - \
-                   the first day of the Lunar New Year, commonly referred to as the Spring Festival. \
-                   Even if you're generally uninterested in celebratory events, it's hard to resist the \
-                   allure of the family reunion dinner, a quintessential aspect of the Spring Festival. \
-                   Throughout the meal, family members raise their glasses to toast one another, expressing wishes \
-                   for happiness, peace, health, and prosperity in the upcoming year."
-    text_dim_estimator = IntrinsicDimensionEstimator(input_text)
-    print(text_dim_estimator.get_mle())
-    print(text_dim_estimator.get_phd())
-
     # evaluating intrinsic dimensions over sample texts
     input_texts = [
+            "Speaking of festivities, there is one day in China that stands unrivaled"
+            "the first day of the Lunar New Year, commonly referred to as the Spring Festival"
+            "Even if you're generally uninterested in celebratory events, it's hard to resist the"
+            "allure of the family reunion dinner, a quintessential aspect of the Spring Festival."
+            "Throughout the meal, family members raise their glasses to toast one another, expressing wishes"
+            "for happiness, peace, health, and prosperity in the upcoming year.",
             "Berlin, die Hauptstadt Deutschlands, ist eine dynamische Stadt, die sowohl eine reiche Geschichte "
             "als auch eine lebendige zeitgenössische Kultur verkörpert. Ihr ikonisches Brandenburger Tor steht "
             "als Symbol für Einheit und Versöhnung, während die Überreste der Berliner Mauer eine eindringliche"
@@ -158,5 +155,11 @@ if __name__ == '__main__':
         ]
     
     text_dim_estimator = IntrinsicDimensionEstimator(input_texts)
+    print(text_dim_estimator.lang_lists)
     print(text_dim_estimator.get_mle())
     print(text_dim_estimator.get_phd())
+
+    input_data = load_informaticup_text_data()
+    text_dim_estimator = IntrinsicDimensionEstimator(input_data)
+    print(text_dim_estimator.lang_lists)
+    print(text_dim_estimator.get_mle())
