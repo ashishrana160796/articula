@@ -87,7 +87,7 @@ class PHD():
             self,
             X: np.ndarray,
             y: np.ndarray | None=None,
-            min_points: int=50,
+            min_points: int=8,
             max_points: int=512,
             point_jump: int=40,
         ):

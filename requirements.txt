@@ -18,3 +18,5 @@ tqdm
 pillow
 flask
 jsonify
+xgboost
+omegaconf

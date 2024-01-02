@@ -3,7 +3,7 @@ from pathlib import Path
 from common import constants as const
 
 import torch
-from transformers import AutoModelForSequenceClassification, AutoTokenizer
+from transformers import AutoModelForSequenceClassification, AutoTokenizer, AutoModel
 
 class LanguageDetector():
     def __init__(
@@ -28,17 +28,18 @@ class LanguageDetector():
 
         # loading the language model and its corresponding tokenizer
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, cache_dir=self.model_path)
-        self.model = AutoModelForSequenceClassification.from_pretrained(self.model_name, cache_dir=self.model_path)
+        self.model_classification = AutoModelForSequenceClassification.from_pretrained(self.model_name, cache_dir=self.model_path)
+        self.model = AutoModel.from_pretrained(self.model_name, cache_dir=self.model_path)
 
     def detect_language(self) -> Dict[str, float]:
         inputs = self.tokenizer(self.data, padding=True, truncation=True, return_tensors="pt")
         with torch.no_grad():
-            logits = self.model(**inputs).logits
+            logits = self.model_classification(**inputs).logits
 
         preds = torch.softmax(logits, dim=-1)
 
         # Map raw predictions to languages
-        id2lang = self.model.config.id2label
+        id2lang = self.model_classification.config.id2label
         vals, idxs = torch.max(preds, dim=1)
         return {id2lang[k.item()]: v.item() for k, v in zip(idxs, vals)}
 
