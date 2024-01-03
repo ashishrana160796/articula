@@ -46,12 +46,10 @@ def generate_logprobs(generate_dataset_fn):
 if __name__ == "__main__":
     if args.logprobs:
         datasets = [
-            Dataset("normal", "data/wp/human"),
-            Dataset("normal", "data/wp/gpt"),
-            Dataset("author", "data/reuter/human"),
-            Dataset("author", "data/reuter/gpt"),
-            Dataset("normal", "data/essay/human"),
-            Dataset("normal", "data/essay/gpt"),
+            Dataset("normal", "data/transformed-model-input-datasets/intrinsic_dim_data/reddit/human"),
+            Dataset("normal", "data/transformed-model-input-datasets/intrinsic_dim_data/reddit/ai"),
+            Dataset("normal", "data/transformed-model-input-datasets/intrinsic_dim_data/wikip/human"),
+            Dataset("normal", "data/transformed-model-input-datasets/intrinsic_dim_data/wikip/ai"),
         ]
         generate_logprobs(get_generate_dataset(*datasets))
 
