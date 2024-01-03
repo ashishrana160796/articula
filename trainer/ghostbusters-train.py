@@ -16,8 +16,10 @@ from common.ghostbusters_symbolic import get_all_logprobs, train_trigram, get_ex
 from common.ghostbusters_symbolic import generate_symbolic_data
 from common.ghostbusters_load import get_generate_dataset, Dataset
 
-with open("results/best_features_three.txt") as f:
-    best_features = f.read().strip().split("\n")
+best_features_path = "results/best_features_three.txt" 
+if os.path.exists(best_features_path):
+    with open("results/best_features_three.txt") as f:
+        best_features = f.read().strip().split("\n")
 
 trigram_model_path = "model/trigram_model.pkl"
 if not os.path.exists(trigram_model_path):
@@ -29,19 +31,14 @@ else:
         open("model/trigram_model.pkl", "rb"), pickle.HIGHEST_PROTOCOL)
     tokenizer = tiktoken.encoding_for_model("davinci").encode
 
-wp_dataset = [
-    Dataset("normal", "data/wp/human"),
-    Dataset("normal", "data/wp/gpt"),
+reddit_dataset = [
+    Dataset("normal", "data/transformed-model-input-datasets/intrinsic_dim_data/reddit/human"),
+    Dataset("normal", "data/transformed-model-input-datasets/intrinsic_dim_data/reddit/ai"),
 ]
 
-reuter_dataset = [
-    Dataset("author", "data/reuter/human"),
-    Dataset("author", "data/reuter/gpt"),
-]
-
-essay_dataset = [
-    Dataset("normal", "data/essay/human"),
-    Dataset("normal", "data/essay/gpt"),
+wikip_dataset = [
+    Dataset("normal", "data/transformed-model-input-datasets/intrinsic_dim_data/wikip/human"),
+    Dataset("normal", "data/transformed-model-input-datasets/intrinsic_dim_data/wikip/ai"),
 ]
 
 eval_dataset = [
@@ -95,9 +92,8 @@ if __name__ == "__main__":
     result_table = [["F1", "Accuracy", "AUC"]]
 
     datasets = [
-        *wp_dataset,
-        *reuter_dataset,
-        *essay_dataset]
+        *reddit_dataset,
+        *wikip_dataset]
     
     generate_dataset_fn = get_generate_dataset(*datasets)
 
@@ -149,29 +145,21 @@ if __name__ == "__main__":
     if args.perform_feature_selection_domain:
         exp_to_data = pickle.load(open("symbolic_data_gpt", "rb"))
 
-        wp_indices = np.where(generate_dataset_fn(lambda file: "wp" in file))[0]
-        reuter_indices = np.where(generate_dataset_fn(lambda file: "reuter" in file))[0]
-        essay_indices = np.where(generate_dataset_fn(lambda file: "essay" in file))[0]
+        reddit_indices = np.where(generate_dataset_fn(lambda file: "reddit" in file))[0]
+        wikip_indices = np.where(generate_dataset_fn(lambda file: "wikip" in file))[0]
 
-        wp_features = select_features(
-            exp_to_data, labels, verbose = True, to_normalize = True, indices=wp_indices
+        reddit_features = select_features(
+            exp_to_data, labels, verbose = True, to_normalize = True, indices=reddit_indices
         )
-        with open("results/best_features_wp.txt", "w") as f:
-            for feat in wp_features:
+        with open("results/best_features_reddit.txt", "w") as f:
+            for feat in reddit_features:
                 f.write(feat + "\n")
 
-        reuter_features = select_features(
-            exp_to_data, labels, verbose=True, to_normalize=True, indices=reuter_indices
+        wikip_features = select_features(
+            exp_to_data, labels, verbose=True, to_normalize=True, indices=wikip_indices
         )
-        with open("results/best_features_reuter.txt", "w") as f:
-            for feat in reuter_features:
-                f.write(feat + "\n")
-
-        essay_features = select_features(
-            exp_to_data, labels, verbose=True, to_normalize=True, indices=essay_indices
-        )
-        with open("results/best_features_essay.txt", "w") as f:
-            for feat in essay_features:
+        with open("results/best_features_wikip.txt", "w") as f:
+            for feat in wikip_features:
                 f.write(feat + "\n")
     
     data, mu, sigma = normalize(
