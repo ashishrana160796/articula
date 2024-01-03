@@ -1,4 +1,3 @@
-import re
 import numpy as np
 from typing import Callable
 from scipy.spatial.distance import cdist
@@ -23,13 +22,6 @@ def _prim_tree(adj_matrix, alpha=1.0):
         
     return s.item()
 
-def preprocess_text(text: str):
-    """
-    It clear text from linebreaks and odd whitespaces, because they seem to interfere with the LM.
-    As a possible improvement, feel free to replace it with a more sophisticated cleaner.
-    """
-    _RE_COMBINE_WHITESPACE = re.compile(r"\s+")
-    return _RE_COMBINE_WHITESPACE.sub(" ", text.replace('\n', ' ')).strip() 
 
 class PHD():
     def __init__(
@@ -87,7 +79,7 @@ class PHD():
             self,
             X: np.ndarray,
             y: np.ndarray | None=None,
-            min_points: int=50,
+            min_points: int=8,
             max_points: int=512,
             point_jump: int=40,
         ):
