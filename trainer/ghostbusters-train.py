@@ -133,6 +133,7 @@ if __name__ == "__main__":
     print(f"Positive Labels: {sum(labels[indices])}, Total Labels: {len(indices)}")
 
     if args.perform_feature_selection:
+        print("Peforming Feature Selection...")
         exp_to_data = pickle.load(open("symbolic_data_gpt", "rb"))
         best_features = select_features(
             exp_to_data, labels, verbose=True, to_normalize=True, indices=train
