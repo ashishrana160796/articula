@@ -16,12 +16,12 @@ from common.ghostbusters_symbolic import get_all_logprobs, train_trigram, get_ex
 from common.ghostbusters_symbolic import generate_symbolic_data
 from common.ghostbusters_load import get_generate_dataset, Dataset
 
-best_features_path = "results/best_features_three.txt" 
+best_features_path = "results/gb_best_features_three.txt" 
 if os.path.exists(best_features_path):
-    with open("results/best_features_three.txt") as f:
+    with open(best_features_path) as f:
         best_features = f.read().strip().split("\n")
 
-trigram_model_path = "model/trigram_model.pkl"
+trigram_model_path = "models/trigram_model.pkl"
 if not os.path.exists(trigram_model_path):
     print("Training trigram model...")
     trigram_model, tokenizer = train_trigram(verbose=True, return_tokenizer=True)
@@ -121,7 +121,7 @@ if __name__ == "__main__":
         t_data_eval = generate_dataset_fn_eval(t_featurize)
         pickle.dump(t_data_eval, open("t_data_eval", "wb"))
     
-    labels = generate_dataset_fn(lambda file: 1 if any([m in file for m in ["gpt", "claude"]]) else 0)
+    labels = generate_dataset_fn(lambda file: 1 if any([m in file for m in ["ai"]]) else 0)
     indices = np.arange(len(labels))
     np.random.shuffle(indices)
     train, test = (
@@ -139,7 +139,7 @@ if __name__ == "__main__":
             exp_to_data, labels, verbose=True, to_normalize=True, indices=train
         )
 
-        with open("results/best_features_three.txt", "w") as f:
+        with open("results/gb_best_features_three.txt", "w") as f:
             for feat in best_features:
                 f.write(feat + "\n")
 
@@ -152,14 +152,14 @@ if __name__ == "__main__":
         reddit_features = select_features(
             exp_to_data, labels, verbose = True, to_normalize = True, indices=reddit_indices
         )
-        with open("results/best_features_reddit.txt", "w") as f:
+        with open("results/gb_best_features_reddit.txt", "w") as f:
             for feat in reddit_features:
                 f.write(feat + "\n")
 
         wikip_features = select_features(
             exp_to_data, labels, verbose=True, to_normalize=True, indices=wikip_indices
         )
-        with open("results/best_features_wikip.txt", "w") as f:
+        with open("results/gb_best_features_wikip.txt", "w") as f:
             for feat in wikip_features:
                 f.write(feat + "\n")
     
@@ -176,12 +176,12 @@ if __name__ == "__main__":
     if args.train_on_all_data:
         model.fit(data, labels)
 
-        with open("model/features.txt", "w") as f:
+        with open("models/gb_features.txt", "w") as f:
             for feat in best_features:
                 f.write(feat + "\n")
-        pickle.dump(model, open("model/model", "wb"))
-        pickle.dump(mu, open("model/mu", "wb"))
-        pickle.dump(sigma, open("model/sigma", "wb"))
+        pickle.dump(model, open("models/gb_model", "wb"))
+        pickle.dump(mu, open("models/gb_mu", "wb"))
+        pickle.dump(sigma, open("models/gb_sigma", "wb"))
         pickle.dump(trigram_model, open(trigram_model_path, "wb"))
 
         print("Saved model to model/")
