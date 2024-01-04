@@ -64,7 +64,13 @@ if __name__ == "__main__":
 
     if args.logprob_other:
         other_datasets = [
-             Dataset("normal", "data/informaticup-test-dataset/informaticup-dataset/ai_gen_text")
+            Dataset("normal", "data/other/ets"),
+            Dataset("normal", "data/other/lang8"),
+            Dataset("normal", "data/other/pelic"),
+            Dataset("normal", "data/other/gptzero/gpt"),
+            Dataset("normal", "data/other/gptzero/human"),
+            Dataset("normal", "data/other/toefl91"),
+            Dataset("normal", "data/other/undetectable"),
         ]
 
         generate_logprobs(get_generate_dataset(*other_datasets), model_name= args.model)
