@@ -57,13 +57,12 @@ eval_dataset = [
 def get_featurized_data(generate_dataset_fn, best_features):
     t_data = generate_dataset_fn(t_featurize)
 
-    xlmr, db, trigram, unigram = get_all_logprobs(
+    gpt2, trigram, unigram = get_all_logprobs(
         generate_dataset_fn, trigram=trigram_model, tokenizer=tokenizer
     )
 
     vector_map = {
-        "xlmr-logprobs": lambda file: xlmr[file],
-        "db-logprobs": lambda file: db[file],
+        "gpt2-logprobs": lambda file: gpt2[file],
         "trigram-logprobs": lambda file: trigram[file],
         "unigram-logprobs": lambda file: unigram[file],
     }
