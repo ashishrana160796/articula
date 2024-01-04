@@ -110,11 +110,11 @@ def convert_file_to_logprob_file(file_name, model):
     return logprob_file_path
 
 #Here the function actually is just creating a featurized vector using 2 model log probs. Not sure where it was used again. Will check.
-def t_featurize_logprobs(gpt2_logprobs, tokens):
+def t_featurize_logprobs(xlmr_logprobs, db_logprobs, tokens):
     X = []
 
     outliers = []
-    for logprob in gpt2_logprobs:
+    for logprob in xlmr_logprobs:
         if logprob > 3:
             outliers.append(logprob)
 
@@ -123,10 +123,10 @@ def t_featurize_logprobs(gpt2_logprobs, tokens):
     X.append(np.mean(outliers[:25]))
     X.append(np.mean(outliers[25:50]))
 
-    #diffs = sorted(davinci_logprobs - ada_logprobs, reverse=True)
-    #diffs += [0] * (50 - min(50, len(diffs)))
-    #X.append(np.mean(diffs[:25]))
-    #X.append(np.mean(diffs[25:]))
+    diffs = sorted(xlmr_logprobs - db_logprobs, reverse=True)
+    diffs += [0] * (50 - min(50, len(diffs)))
+    X.append(np.mean(diffs[:25]))
+    X.append(np.mean(diffs[25:]))
 
     token_len = sorted(get_token_len(tokens), reverse=True)
     token_len += [0] * (50 - min(50, len(token_len)))
@@ -140,12 +140,14 @@ def t_featurize(file, num_tokens=1024):
     """
     Manually handcrafted features for classification.
     """
-    gpt2_file = convert_file_to_logprob_file(file, "gpt2")
+    xlmr_file = convert_file_to_logprob_file(file, "xlmr")
+    db_file = convert_file_to_logprob_file(file, "db")
 
-    gpt2_logprobs = get_logprobs(gpt2_file)[:num_tokens]
-    tokens = get_tokens(gpt2_file)[:num_tokens]
+    xlmr_logprobs = get_logprobs(xlmr_file)[:num_tokens]
+    db_logprobs = get_logprobs(db_file)[:num_tokens]
+    tokens = get_tokens(xlmr_file)[:num_tokens]
 
-    return t_featurize_logprobs(gpt2_logprobs, tokens)
+    return t_featurize_logprobs(xlmr_logprobs, db_logprobs, tokens)
 
 
 def select_features(exp_to_data, labels, verbose=True, to_normalize=True, indices=None):
