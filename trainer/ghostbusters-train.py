@@ -28,7 +28,7 @@ if not os.path.exists(trigram_model_path):
 else:
     print("Loading trigram model...")
     trigram_model = pickle.load(
-        open("model/trigram_model.pkl", "rb"), pickle.HIGHEST_PROTOCOL)
+        open(trigram_model_path, "rb"), pickle.HIGHEST_PROTOCOL)
     tokenizer = tiktoken.encoding_for_model("davinci").encode
 
 reddit_dataset = [
