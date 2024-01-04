@@ -8,8 +8,6 @@ import xgboost as xgb
 from omegaconf import OmegaConf
 from scipy.stats import sem
 from numpy import mean
-from numpy import std
-from sklearn.datasets import make_classification
 from sklearn.model_selection import RepeatedKFold
 from sklearn.model_selection import cross_val_score
 from sklearn.linear_model import LogisticRegression
