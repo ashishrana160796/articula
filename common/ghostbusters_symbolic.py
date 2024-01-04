@@ -7,8 +7,8 @@ import numpy as np
 import tiktoken
 import dill as pickle
 
-from common.ghostbusters_featurize import *
-from common.ngram import *
+from utils.featurize import *
+from utils.n_gram import *
 
 from collections import Counter, defaultdict
 from sklearn.linear_model import LogisticRegression
@@ -36,7 +36,7 @@ scalar_functions = {
     "s-l2": np.linalg.norm,
 }
 
-vectors = ["gpt2-logprobs", "trigram-logprobs", "unigram-logprobs"]
+vectors = ["xlmr-logprobs", "db-logprobs","trigram-logprobs", "unigram-logprobs"]
 
 # Get vec_combinations
 vec_combinations = defaultdict(list)
@@ -124,7 +124,7 @@ def get_all_logprobs(
     if trigram is None:
         trigram, tokenizer = train_trigram(verbose=verbose, return_tokenizer=True)
 
-    gpt2_logprobs = {}
+    xlmr_logprobs, db_logprobs = {}, {}
     trigram_logprobs, unigram_logprobs = {}, {}
 
     if verbose:
@@ -136,16 +136,13 @@ def get_all_logprobs(
     for file in to_iter:
         with open(file, "r") as f:
             doc = preprocess(f.read())
-        gpt2_logprobs[file] = get_logprobs(
-            convert_file_to_logprob_file(file, "gpt2")
-        )[:num_tokens]
-        
-        trigram_logprobs[file] = score_ngram(doc, trigram, tokenizer, n=3)[:num_tokens]
-        unigram_logprobs[file] = score_ngram(doc, trigram.base, tokenizer, n=1)[
-            :num_tokens
-        ]
+        xlmr_logprobs[file] = get_logprobs(convert_file_to_logprob_file(file, "xlmr"))[:num_tokens]
+        db_logprobs[file] = get_logprobs(convert_file_to_logprob_file(file, "db"))[:num_tokens]
 
-    return gpt2_logprobs, trigram_logprobs, unigram_logprobs
+        trigram_logprobs[file] = score_ngram(doc, trigram, tokenizer, n=3)[:num_tokens]
+        unigram_logprobs[file] = score_ngram(doc, trigram.base, tokenizer, n=1)[:num_tokens]
+
+    return xlmr_logprobs, db_logprobs, trigram_logprobs, unigram_logprobs
 
 
 def generate_symbolic_data(
@@ -161,13 +158,15 @@ def generate_symbolic_data(
     Brute forces and generates symbolic data from a dataset of text files.
     """
     (
-        gpt2_logprobs,
+        xlmr_logprobs,
+        db_logprobs,
         trigram_logprobs,
         unigram_logprobs,
     ) = get_all_logprobs(generate_dataset, trigram=trigram, tokenizer=tokenizer, preprocess=preprocess, verbose=verbose)
 
     vector_map = {
-        "gpt2-logprobs": lambda file: gpt2_logprobs[file],
+        "xlmr-logprobs": lambda file: xlmr_logprobs[file],
+        "db-logprobs": lambda file: db_logprobs[file],
         "trigram-logprobs": lambda file: trigram_logprobs[file],
         "unigram-logprobs": lambda file: unigram_logprobs[file],
     }
