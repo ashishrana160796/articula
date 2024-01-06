@@ -73,7 +73,6 @@ def load_informaticup_dataset(input_features: List[str]= ['mle_value', 'genre_va
     del text_dim_estimator
     genre_detector = GenreDetector(infcp_txt_data)
     genre_values = genre_detector.detect_genre()
-    print(genre_values)
     del genre_detector
     y = np.zeros(len(mle_values))
     if len(input_features) == 1:
