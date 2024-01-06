@@ -5,6 +5,7 @@ import os
 import argparse
 
 from transformers import GPT2LMHeadModel, GPT2Tokenizer
+from transformers import AutoModelForMaskedLM, AutoTokenizer
 import torch
 from sklearn.linear_model import LogisticRegression
 from common.ghostbusters_featurize import normalize, t_featurize_logprobs, score_ngram
@@ -15,7 +16,7 @@ parser.add_argument("--file", type=str, default="input.txt")
 args = parser.parse_args()
 
 file = args.file
-MAX_TOKENS = 1024
+MAX_TOKENS = 512
 best_features = open("models/gb_features.txt").read().strip().split("\n")
 
 # Load davinci tokenizer
@@ -36,7 +37,7 @@ with open(file) as f:
     print(f"Input: {doc}")
 
 # Load/Train trigram
-trigram_model_path = "models/trigram_model.pkl"
+trigram_model_path = "models/trigram_model_mling.pkl"
 if not os.path.exists(trigram_model_path):
     print("Training trigram model...")
     trigram_model = train_trigram(verbose=True, return_tokenizer=False)
@@ -48,36 +49,54 @@ else:
 trigram = np.array(score_ngram(doc, trigram_model, enc.encode, n=3, strip_first=False))
 unigram = np.array(score_ngram(doc, trigram_model.base, enc.encode, n=1, strip_first=False))
 
-
 tokenizer_gpt2 = GPT2Tokenizer.from_pretrained("gpt2")
 model_gpt2 = GPT2LMHeadModel.from_pretrained("gpt2")
 
-max_length = model_gpt2.config.n_positions
-tokens = tokenizer_gpt2(doc, return_tensors="pt", max_length=max_length, truncation=True)
+tokens = tokenizer_gpt2(doc, return_tensors="pt", max_length=MAX_TOKENS, truncation=True)
     
 with torch.no_grad():
-    outputs = model_gpt2(**tokens, labels=tokens["input_ids"])
+    outputs_gpt2 = model_gpt2(**tokens, labels=tokens["input_ids"])
     
-logits = outputs.logits
-log_probs = torch.nn.functional.log_softmax(logits, dim=-1)
+logits_gpt2 = outputs_gpt2.logits
+log_probs_gpt2 = torch.nn.functional.log_softmax(logits_gpt2, dim=-1)
+
+# Load DistilBERT Multilingual model
+db_model_name = "distilbert-base-multilingual-cased"
+db_model = AutoModelForMaskedLM.from_pretrained(db_model_name)
+
+# Get model output
+db_model.eval()  # Set the model to evaluation mode
+with torch.no_grad():
+    outputs_db = db_model(**tokens, labels=tokens["input_ids"])
+    
+# Calculate log probabilities
+logits_db = outputs_db.logits
+log_probs_db = torch.nn.functional.log_softmax(logits_db, dim=-1)
 
 # Extract log probabilities for each token
 gpt2_map = {"\n": "Ċ", "\t": "ĉ", " ": "Ġ"}
-token_log_probs = []
+token_log_probs_gpt2 = []
+token_log_probs_db = []
 subwords = []
 for i, input_id in enumerate(tokens["input_ids"][0]):
-    token_log_prob = log_probs[0, i, input_id].item()
+    token_log_prob_gpt2 = log_probs_gpt2[0, i, input_id].item()
+    token_log_prob_db = log_probs_db[0, i, input_id].item()
     token_text = tokenizer_gpt2.decode([input_id])
     for k, v in gpt2_map.items():
         token_text = token_text.replace(k, v)
         
     subwords.append(token_text)
-    token_log_probs.append(token_log_prob)
+    token_log_probs_gpt2.append(token_log_prob_gpt2)
+    token_log_probs_db.append(token_log_prob_db)
 
-t_features = t_featurize_logprobs(token_log_probs, subwords)
+token_log_probs_gpt2 = np.array(token_log_probs_gpt2)
+token_log_probs_db = np.arraytoken_log_probs_db)
+
+t_features = t_featurize_logprobs(token_log_probs_gpt2, token_log_probs_db, subwords)
 
 vector_map = {
-    "gpt2-logprobs": token_log_probs,
+    "gpt2-logprobs": np.array(token_log_probs_gpt2),
+    "db-logprobs": np.array(token_log_probs_db),
     "trigram-logprobs": trigram,
     "unigram-logprobs": unigram
 }
