@@ -109,7 +109,6 @@ def convert_file_to_logprob_file(file_name, model):
 
     return logprob_file_path
 
-#Here the function actually is just creating a featurized vector using 2 model log probs. Not sure where it was used again. Will check.
 def t_featurize_logprobs(gpt2_logprobs, db_logprobs, tokens):
     X = []
 
