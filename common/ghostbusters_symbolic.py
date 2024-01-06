@@ -1,5 +1,5 @@
 from nltk.util import ngrams
-from nltk.corpus import brown, europarl_raw
+from nltk.corpus import brown
 from nltk.tokenize import word_tokenize
 
 import tqdm
@@ -7,8 +7,8 @@ import numpy as np
 import tiktoken
 import dill as pickle
 
-from utils.featurize import *
-from utils.n_gram import *
+from common.ghostbusters_featurize import *
+from common.ngram import *
 
 from collections import Counter, defaultdict
 from sklearn.linear_model import LogisticRegression
@@ -36,7 +36,7 @@ scalar_functions = {
     "s-l2": np.linalg.norm,
 }
 
-vectors = ["gpt2-logprobs", "db-logprobs","trigram-logprobs", "unigram-logprobs"]
+vectors = ["gpt2-logprobs", "trigram-logprobs", "unigram-logprobs"]
 
 # Get vec_combinations
 vec_combinations = defaultdict(list)
@@ -95,39 +95,22 @@ def train_trigram(verbose=True, return_tokenizer=False):
     vocab_size = enc.n_vocab
 
     # We use the brown corpus to train the n-gram model
-    en_sentences = brown.sents()
-    de_sentences = europarl_raw.german.sents()
-
-    combined_sentences = en_sentences + de_sentences
+    sentences = brown.sents()
 
     if verbose:
         print("Tokenizing corpus...")
-
-    combined_tokenized_corpus = []
-    for sentence in tqdm.tqdm(combined_sentences):
+    tokenized_corpus = []
+    for sentence in tqdm.tqdm(sentences):
         tokens = tokenizer(" ".join(sentence))
-        combined_tokenized_corpus += tokens
-
-    # en_tokenized_corpus = []
-    # for sentence in tqdm.tqdm(en_sentences):
-    #     tokens = tokenizer(" ".join(sentence))
-    #     en_tokenized_corpus += tokens
-    
-    # de_tokenized_corpus = []
-    # for sentence in tqdm.tqdm(de_sentences):
-    #     tokens = tokenizer(" ".join(sentence))
-    #     de_tokenized_corpus += tokens
-    
-    # # Combine the tokens
-    # combined_tokens = en_tokenized_corpus + de_tokenized_corpus
+        tokenized_corpus += tokens
 
     if verbose:
         print("\nTraining n-gram model...")
 
     if return_tokenizer:
-        return TrigramBackoff(combined_tokenized_corpus), tokenizer
+        return TrigramBackoff(tokenized_corpus), tokenizer
     else:
-        return TrigramBackoff(combined_tokenized_corpus)
+        return TrigramBackoff(tokenized_corpus)
 
 
 def get_all_logprobs(
@@ -136,12 +119,12 @@ def get_all_logprobs(
     verbose=True,
     trigram=None,
     tokenizer=None,
-    num_tokens=511,
+    num_tokens=1023,
 ):
     if trigram is None:
         trigram, tokenizer = train_trigram(verbose=verbose, return_tokenizer=True)
 
-    gpt2_logprobs, db_logprobs = {}, {}
+    gpt2_logprobs = {}
     trigram_logprobs, unigram_logprobs = {}, {}
 
     if verbose:
@@ -153,13 +136,16 @@ def get_all_logprobs(
     for file in to_iter:
         with open(file, "r") as f:
             doc = preprocess(f.read())
-        gpt2_logprobs[file] = get_logprobs(convert_file_to_logprob_file(file, "gpt2"))[:num_tokens]
-        db_logprobs[file] = get_logprobs(convert_file_to_logprob_file(file, "db"))[:num_tokens]
-
+        gpt2_logprobs[file] = get_logprobs(
+            convert_file_to_logprob_file(file, "gpt2")
+        )[:num_tokens]
+        
         trigram_logprobs[file] = score_ngram(doc, trigram, tokenizer, n=3)[:num_tokens]
-        unigram_logprobs[file] = score_ngram(doc, trigram.base, tokenizer, n=1)[:num_tokens]
+        unigram_logprobs[file] = score_ngram(doc, trigram.base, tokenizer, n=1)[
+            :num_tokens
+        ]
 
-    return gpt2_logprobs, db_logprobs, trigram_logprobs, unigram_logprobs
+    return gpt2_logprobs, trigram_logprobs, unigram_logprobs
 
 
 def generate_symbolic_data(
@@ -176,14 +162,12 @@ def generate_symbolic_data(
     """
     (
         gpt2_logprobs,
-        db_logprobs,
         trigram_logprobs,
         unigram_logprobs,
     ) = get_all_logprobs(generate_dataset, trigram=trigram, tokenizer=tokenizer, preprocess=preprocess, verbose=verbose)
 
     vector_map = {
         "gpt2-logprobs": lambda file: gpt2_logprobs[file],
-        "db-logprobs": lambda file: db_logprobs[file],
         "trigram-logprobs": lambda file: trigram_logprobs[file],
         "unigram-logprobs": lambda file: unigram_logprobs[file],
     }
