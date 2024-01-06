@@ -1,5 +1,5 @@
 from nltk.util import ngrams
-from nltk.corpus import brown
+from nltk.corpus import brown, europarl_raw
 from nltk.tokenize import word_tokenize
 
 import tqdm
@@ -36,7 +36,7 @@ scalar_functions = {
     "s-l2": np.linalg.norm,
 }
 
-vectors = ["xlmr-logprobs", "db-logprobs","trigram-logprobs", "unigram-logprobs"]
+vectors = ["gpt2-logprobs", "db-logprobs","trigram-logprobs", "unigram-logprobs"]
 
 # Get vec_combinations
 vec_combinations = defaultdict(list)
@@ -95,22 +95,39 @@ def train_trigram(verbose=True, return_tokenizer=False):
     vocab_size = enc.n_vocab
 
     # We use the brown corpus to train the n-gram model
-    sentences = brown.sents()
+    en_sentences = brown.sents()
+    de_sentences = europarl_raw.german.sents()
+
+    combined_sentences = en_sentences + de_sentences
 
     if verbose:
         print("Tokenizing corpus...")
-    tokenized_corpus = []
-    for sentence in tqdm.tqdm(sentences):
+
+    combined_tokenized_corpus = []
+    for sentence in tqdm.tqdm(combined_sentences):
         tokens = tokenizer(" ".join(sentence))
-        tokenized_corpus += tokens
+        combined_tokenized_corpus += tokens
+
+    # en_tokenized_corpus = []
+    # for sentence in tqdm.tqdm(en_sentences):
+    #     tokens = tokenizer(" ".join(sentence))
+    #     en_tokenized_corpus += tokens
+    
+    # de_tokenized_corpus = []
+    # for sentence in tqdm.tqdm(de_sentences):
+    #     tokens = tokenizer(" ".join(sentence))
+    #     de_tokenized_corpus += tokens
+    
+    # # Combine the tokens
+    # combined_tokens = en_tokenized_corpus + de_tokenized_corpus
 
     if verbose:
         print("\nTraining n-gram model...")
 
     if return_tokenizer:
-        return TrigramBackoff(tokenized_corpus), tokenizer
+        return TrigramBackoff(combined_tokenized_corpus), tokenizer
     else:
-        return TrigramBackoff(tokenized_corpus)
+        return TrigramBackoff(combined_tokenized_corpus)
 
 
 def get_all_logprobs(
@@ -119,12 +136,12 @@ def get_all_logprobs(
     verbose=True,
     trigram=None,
     tokenizer=None,
-    num_tokens=1023,
+    num_tokens=511,
 ):
     if trigram is None:
         trigram, tokenizer = train_trigram(verbose=verbose, return_tokenizer=True)
 
-    xlmr_logprobs, db_logprobs = {}, {}
+    gpt2_logprobs, db_logprobs = {}, {}
     trigram_logprobs, unigram_logprobs = {}, {}
 
     if verbose:
@@ -136,13 +153,13 @@ def get_all_logprobs(
     for file in to_iter:
         with open(file, "r") as f:
             doc = preprocess(f.read())
-        xlmr_logprobs[file] = get_logprobs(convert_file_to_logprob_file(file, "xlmr"))[:num_tokens]
+        gpt2_logprobs[file] = get_logprobs(convert_file_to_logprob_file(file, "gpt2"))[:num_tokens]
         db_logprobs[file] = get_logprobs(convert_file_to_logprob_file(file, "db"))[:num_tokens]
 
         trigram_logprobs[file] = score_ngram(doc, trigram, tokenizer, n=3)[:num_tokens]
         unigram_logprobs[file] = score_ngram(doc, trigram.base, tokenizer, n=1)[:num_tokens]
 
-    return xlmr_logprobs, db_logprobs, trigram_logprobs, unigram_logprobs
+    return gpt2_logprobs, db_logprobs, trigram_logprobs, unigram_logprobs
 
 
 def generate_symbolic_data(
@@ -158,14 +175,14 @@ def generate_symbolic_data(
     Brute forces and generates symbolic data from a dataset of text files.
     """
     (
-        xlmr_logprobs,
+        gpt2_logprobs,
         db_logprobs,
         trigram_logprobs,
         unigram_logprobs,
     ) = get_all_logprobs(generate_dataset, trigram=trigram, tokenizer=tokenizer, preprocess=preprocess, verbose=verbose)
 
     vector_map = {
-        "xlmr-logprobs": lambda file: xlmr_logprobs[file],
+        "gpt2-logprobs": lambda file: gpt2_logprobs[file],
         "db-logprobs": lambda file: db_logprobs[file],
         "trigram-logprobs": lambda file: trigram_logprobs[file],
         "unigram-logprobs": lambda file: unigram_logprobs[file],

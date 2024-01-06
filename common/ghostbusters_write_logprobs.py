@@ -1,4 +1,5 @@
 import json
+import tiktoken
 from transformers import GPT2LMHeadModel, GPT2Tokenizer
 from transformers import XLMRobertaForMaskedLM, XLMRobertaTokenizer
 from transformers import AutoModelForMaskedLM, AutoTokenizer
@@ -52,12 +53,12 @@ def write_logprobs_db(text, file):
     Run text under distilbert model and write logprobs to file, separated by newline.
     """
     max_length = db_model.config.max_position_embeddings
-    tokens = db_tokenizer(text, return_tensors="pt", max_length=max_length, truncation=True)
+    tokens = tokenizer_gpt2(text, return_tensors="pt", max_length=max_length, truncation=True)
 
     # Get model output
     db_model.eval()  # Set the model to evaluation mode
     with torch.no_grad():
-        outputs = db_model(**tokens)
+        outputs = db_model(**tokens, labels=tokens["input_ids"])
     
     # Calculate log probabilities
     logits = outputs.logits
@@ -68,7 +69,7 @@ def write_logprobs_db(text, file):
     token_log_probs = []
     for i, input_id in enumerate(tokens["input_ids"][0]):
         token_log_prob = log_probs[0, i, input_id].item()
-        token_text = db_tokenizer.decode([input_id])
+        token_text = tokenizer_gpt2.decode([input_id])
         for k, v in gpt2_map.items():
             token_text = token_text.replace(k, v)
 
@@ -84,12 +85,12 @@ def write_logprobs_xlmr(text, file):
     Run text under XLM-Roberta model and write logprobs to file, separated by newline.
     """
     max_length = xlm_model.config.max_position_embeddings
-    tokens = xlm_tokenizer(text, return_tensors="pt", max_length=max_length, truncation=True)
+    tokens = tokenizer_gpt2(text, return_tensors="pt", max_length=max_length, truncation=True)
 
     # Get model output
     xlm_model.eval()  # Set the model to evaluation mode
     with torch.no_grad():
-        outputs = xlm_model(**tokens)
+        outputs = xlm_model(**tokens, labels=tokens["input_ids"])
     
     # Calculate log probabilities
     logits = outputs.logits
@@ -100,7 +101,7 @@ def write_logprobs_xlmr(text, file):
     token_log_probs = []
     for i, input_id in enumerate(tokens["input_ids"][0]):
         token_log_prob = log_probs[0, i, input_id].item()
-        token_text = xlm_tokenizer.decode([input_id])
+        token_text = tokenizer_gpt2.decode([input_id])
         for k, v in gpt2_map.items():
             token_text = token_text.replace(k, v)
 
