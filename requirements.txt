@@ -20,3 +20,9 @@ flask
 jsonify
 xgboost
 omegaconf
+simpletransformers
+tenacity
+tiktoken
+tabulate
+dill
+nltk
