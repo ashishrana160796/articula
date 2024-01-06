@@ -90,7 +90,7 @@ for i, input_id in enumerate(tokens["input_ids"][0]):
     token_log_probs_db.append(token_log_prob_db)
 
 token_log_probs_gpt2 = np.array(token_log_probs_gpt2)
-token_log_probs_db = np.arraytoken_log_probs_db)
+token_log_probs_db = np.array(token_log_probs_db)
 
 t_features = t_featurize_logprobs(token_log_probs_gpt2, token_log_probs_db, subwords)
 
