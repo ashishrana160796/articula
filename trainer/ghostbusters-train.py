@@ -20,8 +20,10 @@ best_features_path = "results/gb_best_features_three.txt"
 if os.path.exists(best_features_path):
     with open(best_features_path) as f:
         best_features = f.read().strip().split("\n")
+else:
+    print("Need to peform feature selection first")
 
-trigram_model_path = "models/trigram_model.pkl"
+trigram_model_path = "models/trigram_model_mling.pkl"
 if not os.path.exists(trigram_model_path):
     print("Training trigram model...")
     trigram_model, tokenizer = train_trigram(verbose=True, return_tokenizer=True)
@@ -41,28 +43,28 @@ wikip_dataset = [
     Dataset("normal", "data/transformed-model-input-datasets/intrinsic_dim_data/wikip/ai"),
 ]
 
-eval_dataset = [
-    Dataset("normal", "data/wp/claude"),
-    Dataset("author", "data/reuter/claude"),
-    Dataset("normal", "data/essay/claude"),
-    Dataset("normal", "data/wp/gpt_prompt1"),
-    Dataset("author", "data/reuter/gpt_prompt1"),
-    Dataset("normal", "data/essay/gpt_prompt1"),
-    Dataset("normal", "data/wp/gpt_semantic"),
-    Dataset("author", "data/reuter/gpt_semantic"),
-    Dataset("normal", "data/essay/gpt_semantic"),
-]
+# eval_dataset = [
+#     Dataset("normal", "data/wp/claude"),
+#     Dataset("author", "data/reuter/claude"),
+#     Dataset("normal", "data/essay/claude"),
+#     Dataset("normal", "data/wp/gpt_prompt1"),
+#     Dataset("author", "data/reuter/gpt_prompt1"),
+#     Dataset("normal", "data/essay/gpt_prompt1"),
+#     Dataset("normal", "data/wp/gpt_semantic"),
+#     Dataset("author", "data/reuter/gpt_semantic"),
+#     Dataset("normal", "data/essay/gpt_semantic"),
+# ]
 
 
 def get_featurized_data(generate_dataset_fn, best_features):
     t_data = generate_dataset_fn(t_featurize)
 
-    xlmr, db, trigram, unigram = get_all_logprobs(
+    gpt2, db, trigram, unigram = get_all_logprobs(
         generate_dataset_fn, trigram=trigram_model, tokenizer=tokenizer
     )
 
     vector_map = {
-        "xlmr-logprobs": lambda file: xlmr[file],
+        "gpt2-logprobs": lambda file: gpt2[file],
         "db-logprobs": lambda file: db[file],
         "trigram-logprobs": lambda file: trigram[file],
         "unigram-logprobs": lambda file: unigram[file],
@@ -74,13 +76,13 @@ def get_featurized_data(generate_dataset_fn, best_features):
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--generate_symbolic_data", action="store_true")
-parser.add_argument("--generate_symbolic_data_eval", action="store_true")
+parser.add_argument("--generate_symbolic_data_four", action="store_true")
+#parser.add_argument("--generate_symbolic_data_eval", action="store_true")
 
 parser.add_argument("--perform_feature_selection", action="store_true")
+parser.add_argument("--perform_feature_selection_four", action="store_true")
 #parser.add_argument("--perform_feature_selection_one", action="store_true")
 #parser.add_argument("--perform_feature_selection_two", action="store_true")
-#parser.add_argument("--perform_feature_selection_four", action="store_true")
-
 parser.add_argument("--perform_feature_selection_domain", action="store_true")
 
 parser.add_argument("--train_on_all_data", action="store_true")
@@ -100,27 +102,36 @@ if __name__ == "__main__":
 
     if args.generate_symbolic_data:
         generate_symbolic_data(generate_dataset_fn,
-                               max_depth=3,
+                               max_depth = 3,
                                trigram = trigram_model,
                                tokenizer = tokenizer,
-                               output_file="symbolic_data_gpt",
-                               verbose=True)
+                               output_file = "symbolic_data_gpt_db",
+                               verbose = True)
         
         t_data = generate_dataset_fn(t_featurize)
         pickle.dump(t_data, open("t_data", "wb"))
     
-    if args.generate_symbolic_data_eval:
-        generate_dataset_fn_eval = get_generate_dataset(*eval_dataset)
-        
-        generate_symbolic_data(generate_dataset_fn_eval,
-                               max_depth=3,
-                               trigram = trigram_model,
-                               tokenizer=tokenizer,
-                               output_file="symbolic_data_eval",
+    if args.generate_symbolic_data_four:
+        generate_symbolic_data(generate_dataset_fn,
+                               max_depth=4,
+                               output_file="symbolic_data_gpt_db_four",
                                verbose=True)
+
+        t_data = generate_dataset_fn(t_featurize)
+        pickle.dump(t_data, open("t_data", "wb"))
+    
+    # if args.generate_symbolic_data_eval:
+    #     generate_dataset_fn_eval = get_generate_dataset(*eval_dataset)
         
-        t_data_eval = generate_dataset_fn_eval(t_featurize)
-        pickle.dump(t_data_eval, open("t_data_eval", "wb"))
+    #     generate_symbolic_data(generate_dataset_fn_eval,
+    #                            max_depth=3,
+    #                            trigram = trigram_model,
+    #                            tokenizer=tokenizer,
+    #                            output_file="symbolic_data_eval",
+    #                            verbose=True)
+        
+    #     t_data_eval = generate_dataset_fn_eval(t_featurize)
+    #     pickle.dump(t_data_eval, open("t_data_eval", "wb"))
     
     labels = generate_dataset_fn(lambda file: 1 if any([m in file for m in ["ai"]]) else 0)
     indices = np.arange(len(labels))
@@ -135,7 +146,7 @@ if __name__ == "__main__":
 
     if args.perform_feature_selection:
         print("Peforming Feature Selection...")
-        exp_to_data = pickle.load(open("symbolic_data_gpt", "rb"))
+        exp_to_data = pickle.load(open("symbolic_data_gpt_db", "rb"))
         best_features = select_features(
             exp_to_data, labels, verbose=True, to_normalize=True, indices=train
         )
@@ -144,8 +155,19 @@ if __name__ == "__main__":
             for feat in best_features:
                 f.write(feat + "\n")
 
+    if args.perform_feature_selection_four:
+        print("Peforming Feature Selection...")
+        exp_to_data = pickle.load(open("symbolic_data_gpt_db_four", "rb"))
+        best_features = select_features(
+            exp_to_data, labels, verbose=True, to_normalize=True, indices=train
+        )
+
+        with open("results/gb_best_features_four.txt", "w") as f:
+            for feat in best_features:
+                f.write(feat + "\n")
+
     if args.perform_feature_selection_domain:
-        exp_to_data = pickle.load(open("symbolic_data_gpt", "rb"))
+        exp_to_data = pickle.load(open("symbolic_data_gpt_db", "rb"))
 
         reddit_indices = np.where(generate_dataset_fn(lambda file: "reddit" in file))[0]
         wikip_indices = np.where(generate_dataset_fn(lambda file: "wikip" in file))[0]
