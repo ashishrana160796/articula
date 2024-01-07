@@ -1,5 +1,6 @@
 TRANSFORMED_DATA_SAVE_PATH="data/transformed-model-input-datasets"
 TRANSFORMED_DATA_CSV_NAME="transformed_intrinsic_dim_data.csv"
+GEN_EN_DATA_CSV_NAME="generated_gpt2_en_data.csv"
 INTRINSIC_DIM_DATASET="data/intrinsic-dim-dataset"
 INFORMATICUP_TEXT_DATASET="data/informaticup-test-dataset/ai_gen_text"
 INFORMATICUP_IMAGES_DATASET="data/informaticup-test-dataset/ai_gen_images"
