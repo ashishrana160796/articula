@@ -20,6 +20,6 @@ git rebase main
 git push origin feature/intrinsic-dimension-model --force-with-lease
 ```
 
-3. Finally, after reviewing the pull request, please `squash`` all the commits during the merge into the main branch. Also, add in meaningful PR heading and joint-commit message for all your intermediate commits.
+3. Finally, after reviewing the pull request, please `squash` all the commits during the merge into the main branch. Also, add in meaningful PR heading and joint-commit message for all your intermediate commits.
 
 __Note:__ Please, do not push directly onto the main branch, follow the proposed conventions, and also add another person as reviewer of your code.
