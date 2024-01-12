@@ -18,7 +18,7 @@ class GPT2Generator():
             model_path: str | Path=const.PRE_TRAINED_MODELS,
             language: str='en',
             min_length: int=16,
-            max_length: int=256,
+            max_length: int=128,
             gen_method: str='dtr'
         ):
         """
@@ -55,7 +55,7 @@ class GPT2Generator():
         elif self.gen_method == 'stc':
             self.pipeline = pipeline(task=const.TEX_GEN, model=self.model, tokenizer=self.tokenizer, top_p=0.95, top_k=0)
         elif self.gen_method == 'con':
-            self.pipeline = pipeline(task=const.TEX_GEN, model=self.model, tokenizer=self.tokenizer, penalty_alpha=0.6, top_k=0)
+            self.pipeline = pipeline(task=const.TEX_GEN, model=self.model, tokenizer=self.tokenizer, penalty_alpha=0.6, top_k=12)
         else:
             raise ValueError('The parsed language parameter is incorrect, must be from the set of values in ("dtr", "stc", "con").')
 
@@ -74,12 +74,12 @@ class GPT2Generator():
         return gen_text_list
 
 if __name__ == '__main__':
-    input_text = "Replace me by any text you'd like."
-    generator_en = GPT2Generator(input_text, min_length=256, gen_method='dtr')
+    input_text = 'Paraphrase the text: "I have good person."'
+    generator_en = GPT2Generator(input_text, min_length=32, gen_method='con')
     print(generator_en.generate_text())
     del generator_en
 
-    input_text = "Der Sinn des Lebens ist es"
+    input_text = 'Paraphrasieren Sie den Text: "Ich habe einen guten Menschen."'
     generator_de = GPT2Generator(input_text, language='de', min_length=32, gen_method='con')
     print(generator_de.generate_text())
     del generator_de

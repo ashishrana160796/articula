@@ -92,6 +92,38 @@ def intrinsic_dim_dataset_to_csv(data_path: str | Path, subset_fraction: Optiona
     trasformed_data_df.to_csv(Path(const.TRANSFORMED_DATA_SAVE_PATH) / const.TRANSFORMED_DATA_CSV_NAME, index=False)
 
 
+def intrinsic_dim_gpt2_datasets_to_csv(data_path: str | Path, file_name: str):
+    """
+    It loads GPT2 generated datasets into different transformed csv files for training the intrinsic dimension model
+    """
+    data_df = pd.read_csv(Path(data_path) / file_name)
+    data_sources = ["human"] * len(data_df['category'])
+    data_sources.extend( ["gpt2"] * 3 * len(data_df['ai_text_dtr']))
+    data_split_train = ["train"] * int(0.8 * 4 * len(data_df['category']))
+    data_split_validation = ["validation"] * int(0.1 * 4 * len(data_df['category']))
+    data_split_test = ["test"] * int( 4 * len(data_df['category']) - len(data_split_validation) - len(data_split_train) )
+    data_split_final = data_split_train
+    data_split_final.extend(data_split_validation)
+    data_split_final.extend(data_split_test)
+    data_split_final = random.sample(data_split_final, len(data_split_final))
+    data_targets = [const.HUMAN_TEXT_STR] * len(data_df['category'])
+    data_targets.extend( [const.AI_GENERATED_TEXT_STR] * 3 * len(data_df['ai_text_dtr']))
+    data_texts = list(data_df['human_text'].apply(lambda x: preprocess_text(x)))
+    data_texts.extend(list(data_df['ai_text_dtr'].apply(lambda x: preprocess_text(x))))
+    data_texts.extend(list(data_df['ai_text_stc'].apply(lambda x: preprocess_text(x))))
+    data_texts.extend(list(data_df['ai_text_con'].apply(lambda x: preprocess_text(x))))
+    trasformed_data_df = pd.DataFrame(
+        {
+            'categories': 4 * list(data_df['category']),
+            'text_data' : data_texts,
+            'generator': data_sources,
+            'data_source': data_sources,
+            'data_split' : data_split_final,
+            'target_class': data_targets,
+        })
+    trasformed_data_df.to_csv(Path(const.TRANSFORMED_DATA_SAVE_PATH) / str("intrinsic_dim_"+file_name), index=False)
+
+
 def intrinsic_dim_dataset_to_files(data_path: str | Path, subset_fraction: Optional[float]=1.):
     """
     It loads data subset for the intrinsic dimension dataset into text files with data subset folders,
@@ -125,5 +157,8 @@ def intrinsic_dim_dataset_to_files(data_path: str | Path, subset_fraction: Optio
                 IDX_VAL += 1
 
 if __name__ == '__main__':
-    intrinsic_dim_dataset_to_csv(const.INTRINSIC_DIM_DATASET)
+    # intrinsic_dim_dataset_to_csv(const.INTRINSIC_DIM_DATASET)
     # intrinsic_dim_dataset_to_files(const.INTRINSIC_DIM_DATASET)
+    intrinsic_dim_gpt2_datasets_to_csv(const.TRANSFORMED_DATA_SAVE_PATH, f"{const.GEN_DE_DATA_CSV_NAME.split('.')[0]}_small.{const.GEN_DE_DATA_CSV_NAME.split('.')[1]}")
+    intrinsic_dim_gpt2_datasets_to_csv(const.TRANSFORMED_DATA_SAVE_PATH, f"{const.GEN_DE_DATA_CSV_NAME.split('.')[0]}_large.{const.GEN_DE_DATA_CSV_NAME.split('.')[1]}")
+    intrinsic_dim_gpt2_datasets_to_csv(const.TRANSFORMED_DATA_SAVE_PATH, const.GEN_EN_DATA_CSV_NAME)

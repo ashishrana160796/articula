@@ -21,7 +21,7 @@ from common.data_utils import preprocess_text
 from common.intrinsic_dim_utils import PHD
 from common import constants as const
 from common.data_utils import load_informaticup_text_data
-from common.language_model_utils import LanguageDetector
+from models.detector_models import LanguageDetector
 
 class IntrinsicDimensionEstimator():
     def __init__(
