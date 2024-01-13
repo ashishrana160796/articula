@@ -16,6 +16,7 @@ TEXT_GENRE_XLM_ROBERTA_PARAMS={"num_train_epochs": 15, "learning_rate": 1e-5, "m
 TEX_GEN="text-generation"
 GPT_EN="gpt2"
 GPT_DE="dbmdz/german-gpt2"
+T5_PARAPHRASER="Vamsi/T5_Paraphrase_Paws"
 XGBOOST_CONF_PATH="evaluator/configs/xgboost_params.yaml"
 HUMAN_TEXT_STR="human_text"
 AI_GENERATED_TEXT_STR="ai_gen_text"

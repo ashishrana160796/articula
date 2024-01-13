@@ -15,7 +15,7 @@ from sklearn.linear_model import LogisticRegression
 from common import constants as const
 from common.data_utils import intrinsic_dim_dataset_to_csv
 from models.intrinsic_dim_estimator import IntrinsicDimensionEstimator
-from common.language_model_utils import GenreDetector
+from models.detector_models import GenreDetector
 
 
 parser = argparse.ArgumentParser()

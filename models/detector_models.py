@@ -133,12 +133,12 @@ if __name__ == '__main__':
     print(lang_detector.detect_language())
     del lang_detector
 
-    input_data = load_informaticup_text_data()
-    lang_detector = LanguageDetector(input_data)
-    print(lang_detector.detect_language())
-    del lang_detector
+    # input_data = load_informaticup_text_data()
+    # lang_detector = LanguageDetector(input_data)
+    # print(lang_detector.detect_language())
+    # del lang_detector
 
-    input_data = load_informaticup_text_data()
-    genre_detector = GenreDetector(input_data)
-    print(genre_detector.detect_genre())
-    del genre_detector
+    # input_data = load_informaticup_text_data()
+    # genre_detector = GenreDetector(input_data)
+    # print(genre_detector.detect_genre())
+    # del genre_detector

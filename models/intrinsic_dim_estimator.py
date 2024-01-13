@@ -21,7 +21,7 @@ from common.data_utils import preprocess_text
 from common.intrinsic_dim_utils import PHD
 from common import constants as const
 from common.data_utils import load_informaticup_text_data
-from common.language_model_utils import LanguageDetector
+from models.detector_models import LanguageDetector
 
 class IntrinsicDimensionEstimator():
     def __init__(
@@ -158,8 +158,10 @@ if __name__ == '__main__':
     print(text_dim_estimator.lang_lists)
     print(text_dim_estimator.get_mle())
     print(text_dim_estimator.get_phd())
-
+    print(text_dim_estimator.get_mle().ravel()[0], text_dim_estimator.get_mle().ravel()[1])
+    del text_dim_estimator
     input_data = load_informaticup_text_data()
     text_dim_estimator = IntrinsicDimensionEstimator(input_data)
     print(text_dim_estimator.lang_lists)
     print(text_dim_estimator.get_mle())
+    del text_dim_estimator

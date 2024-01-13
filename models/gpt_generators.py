@@ -18,8 +18,9 @@ class GPT2Generator():
             model_path: str | Path=const.PRE_TRAINED_MODELS,
             language: str='en',
             min_length: int=16,
-            max_length: int=256,
-            gen_method: str='dtr'
+            max_length: int=128,
+            gen_method: str='con',
+            early_stopping: bool=True,
         ):
         """
         The GPT2 generator for the input English or German datasets.
@@ -40,6 +41,7 @@ class GPT2Generator():
         self.min_length = min_length
         self.max_length = max_length
         self.gen_method = gen_method
+        self.early_stopping = early_stopping
 
         if self.language == 'en':
             self.tokenizer = AutoTokenizer.from_pretrained(const.GPT_EN, cache_dir=self.model_path)
@@ -51,11 +53,11 @@ class GPT2Generator():
             raise ValueError('The parsed language parameter is incorrect, must be from the set of values in ("de", "en").')
         
         if self.gen_method == 'dtr':
-            self.pipeline = pipeline(task=const.TEX_GEN, model=self.model, tokenizer=self.tokenizer)
+            self.pipeline = pipeline(task=const.TEX_GEN, model=self.model, tokenizer=self.tokenizer, early_stopping=self.early_stopping)
         elif self.gen_method == 'stc':
-            self.pipeline = pipeline(task=const.TEX_GEN, model=self.model, tokenizer=self.tokenizer, top_p=0.95, top_k=0)
+            self.pipeline = pipeline(task=const.TEX_GEN, model=self.model, tokenizer=self.tokenizer, top_p=0.95, top_k=120, early_stopping=self.early_stopping)
         elif self.gen_method == 'con':
-            self.pipeline = pipeline(task=const.TEX_GEN, model=self.model, tokenizer=self.tokenizer, penalty_alpha=0.6, top_k=0)
+            self.pipeline = pipeline(task=const.TEX_GEN, model=self.model, tokenizer=self.tokenizer, penalty_alpha=0.6, top_k=120, early_stopping=self.early_stopping)
         else:
             raise ValueError('The parsed language parameter is incorrect, must be from the set of values in ("dtr", "stc", "con").')
 
@@ -74,12 +76,16 @@ class GPT2Generator():
         return gen_text_list
 
 if __name__ == '__main__':
-    input_text = "Replace me by any text you'd like."
-    generator_en = GPT2Generator(input_text, min_length=256, gen_method='dtr')
+    input_text = 'Paraphrase the text with additional relevant information: ' \
+                 '"Jupiter, the largest planet in our solar system, has 79 known moons as of my last knowledge update in September 2021."'
+    generator_en = GPT2Generator(input_text, min_length=32, gen_method='con')
     print(generator_en.generate_text())
+    print(generator_en.generate_text()[0].replace(input_text,""), type(generator_en.generate_text()[0].replace(input_text,"")))
     del generator_en
-
-    input_text = "Der Sinn des Lebens ist es"
-    generator_de = GPT2Generator(input_text, language='de', min_length=32, gen_method='con')
-    print(generator_de.generate_text())
-    del generator_de
+    
+    # input_text = 'Paraphrasieren Sie den Text mit zusätzlichen relevanten Informationen: ' \
+    #              '"Frühling erwacht leise, Blumen blühen im Sonnenlicht, Natur tanzt im Wind."'
+    # generator_de = GPT2Generator(input_text, language='de', min_length=32, gen_method='con')
+    # print(generator_de.generate_text())
+    # print(generator_de.generate_text()[0].replace(input_text,""))
+    # del generator_de
