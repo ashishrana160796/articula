@@ -13,6 +13,7 @@ from sklearn.calibration import CalibratedClassifierCV
 
 from tabulate import tabulate
 
+from evaluator.feature_generator import gb_mle_combined_file, get_intrinsic_mle_file
 from common.ghostbusters_featurize import normalize, t_featurize
 from common.ghostbusters_symbolic import get_all_logprobs, train_trigram, get_exp_featurize
 from common.ghostbusters_load import get_generate_dataset, Dataset
@@ -199,6 +200,235 @@ if __name__ == "__main__":
             model_rf.fit(data, labels)
 
             pickle.dump(model_rf, open("models/gb_model_rf", "wb"))
+            print("Saved model to model/")
+
+            #Test on Toefl
+            predictions = model_rf.predict(toefl_data)
+            probs = model_rf.predict_proba(toefl_data)[:, 1]
+
+            result_table.append(
+                [
+                    "Toefl91",
+                    round(f1_score(toefl_labels, predictions), 3),
+                    round(accuracy_score(toefl_labels, predictions), 3),
+                    round(roc_auc_score(toefl_labels, probs), 3),
+                ])
+            
+            #Test on Informatic Cup
+            predictions = model_rf.predict(informaticup_data)
+            probs = model_rf.predict_proba(informaticup_data)[:, 1]
+
+            result_table.append(
+                [
+                    "Informatic Cup",
+                    round(f1_score(informaticup_labels, predictions), 3),
+                    round(accuracy_score(informaticup_labels, predictions), 3),
+                    round(roc_auc_score(informaticup_labels, probs), 3),
+                ])
+            
+    if args.mle:
+        mle_training_data = generate_dataset_fn(get_intrinsic_mle_file)
+        mle_training_data, mu, sigma = normalize(mle_training_data, ret_mu_sigma=True)
+        pickle.dump(mu, open("models/intrinsic_mu", "wb"))
+        pickle.dump(sigma, open("models/intrinsic_sigma", "wb"))
+        labels = generate_dataset_fn(lambda file: 1 if any([m in file for m in ["ai"]]) else 0)
+        
+        #Testing data
+        toefl = get_generate_dataset(Dataset("normal", "data/toefl91"))
+        toefl_labels = toefl(lambda _: 0)
+        toefl_data = toefl(get_intrinsic_mle_file)
+        toefl_data = normalize(toefl_data, mu=mu, sigma=sigma)
+
+        informaticup = get_generate_dataset(Dataset("normal", "data/informaticup-test-dataset/informaticup-dataset/ai_gen_text"))
+        informaticup_labels = informaticup(lambda _: 1)
+        informaticup_data = informaticup(get_intrinsic_mle_file)
+        informaticup_data = normalize(informaticup_data, mu=mu, sigma=sigma)
+
+        if args.model_name == 'logistic':
+            base = LogisticRegression()
+            model_lr = CalibratedClassifierCV(base, cv=5)
+            model_lr.fit(mle_training_data, labels)
+
+            pickle.dump(model_lr, open("models/intrinsic_model_logistic", "wb"))     
+            print("Saved model to model/")
+
+            #Test on Toefl
+            predictions = model_lr.predict(toefl_data)
+            probs = model_lr.predict_proba(toefl_data)[:, 1]
+
+            result_table.append(
+                [
+                    "Toefl91",
+                    round(f1_score(toefl_labels, predictions), 3),
+                    round(accuracy_score(toefl_labels, predictions), 3),
+                    round(roc_auc_score(toefl_labels, probs), 3),
+                ])
+            
+            #Test on Informatic Cup
+            predictions = model_lr.predict(informaticup_data)
+            probs = model_lr.predict_proba(informaticup_data)[:, 1]
+
+            result_table.append(
+                [
+                    "Informatic Cup",
+                    round(f1_score(informaticup_labels, predictions), 3),
+                    round(accuracy_score(informaticup_labels, predictions), 3),
+                    round(roc_auc_score(informaticup_labels, probs), 3),
+                ])
+        
+        if args.model_name == 'xgboost':
+            xgb_clf = xgb.XGBClassifier(objective="binary:logistic", random_state=42)
+            model_xgb = CalibratedClassifierCV(xgb_clf, cv=5)
+            model_xgb.fit(mle_training_data, labels)
+
+            pickle.dump(model_xgb, open("models/intrinsic_model_xgb", "wb"))
+            print("Saved model to model/")
+
+            #Test on Toefl
+            predictions = model_xgb.predict(toefl_data)
+            probs = model_xgb.predict_proba(toefl_data)[:, 1]
+
+            result_table.append(
+                [
+                    "Toefl91",
+                    round(f1_score(toefl_labels, predictions), 3),
+                    round(accuracy_score(toefl_labels, predictions), 3),
+                    round(roc_auc_score(toefl_labels, probs), 3),
+                ])
+            
+            #Test on Informatic Cup
+            predictions = model_xgb.predict(informaticup_data)
+            probs = model_xgb.predict_proba(informaticup_data)[:, 1]
+
+            result_table.append(
+                [
+                    "Informatic Cup",
+                    round(f1_score(informaticup_labels, predictions), 3),
+                    round(accuracy_score(informaticup_labels, predictions), 3),
+                    round(roc_auc_score(informaticup_labels, probs), 3),
+                ])
+            
+        if args.model_name == 'random_forest':
+            rf = RandomForestClassifier(n_estimators=100, random_state=42)
+            model_rf = CalibratedClassifierCV(rf, cv=5)
+            model_rf.fit(mle_training_data, labels)
+
+            pickle.dump(model_rf, open("models/intrinsic_model_rf", "wb"))
+            print("Saved model to model/")
+
+            #Test on Toefl
+            predictions = model_rf.predict(toefl_data)
+            probs = model_rf.predict_proba(toefl_data)[:, 1]
+
+            result_table.append(
+                [
+                    "Toefl91",
+                    round(f1_score(toefl_labels, predictions), 3),
+                    round(accuracy_score(toefl_labels, predictions), 3),
+                    round(roc_auc_score(toefl_labels, probs), 3),
+                ])
+            
+            #Test on Informatic Cup
+            predictions = model_rf.predict(informaticup_data)
+            probs = model_rf.predict_proba(informaticup_data)[:, 1]
+
+            result_table.append(
+                [
+                    "Informatic Cup",
+                    round(f1_score(informaticup_labels, predictions), 3),
+                    round(accuracy_score(informaticup_labels, predictions), 3),
+                    round(roc_auc_score(informaticup_labels, probs), 3),
+                ])
+
+
+    if args.combined:
+        combined_training_data = generate_dataset_fn(gb_mle_combined_file)
+        combined_training_data, mu, sigma = normalize(combined_training_data, ret_mu_sigma=True)
+        pickle.dump(mu, open("models/comb_mu", "wb"))
+        pickle.dump(sigma, open("models/comb_sigma", "wb"))
+        labels = generate_dataset_fn(lambda file: 1 if any([m in file for m in ["ai"]]) else 0)
+
+        #Testing data
+        toefl = get_generate_dataset(Dataset("normal", "data/toefl91"))
+        toefl_labels = toefl(lambda _: 0)
+        toefl_data = toefl(gb_mle_combined_file)
+        toefl_data = normalize(toefl_data, mu=mu, sigma=sigma)
+
+        informaticup = get_generate_dataset(Dataset("normal", "data/informaticup-test-dataset/informaticup-dataset/ai_gen_text"))
+        informaticup_labels = informaticup(lambda _: 1)
+        informaticup_data = informaticup(gb_mle_combined_file)
+        informaticup_data = normalize(informaticup_data, mu=mu, sigma=sigma)
+
+        if args.model_name == 'logistic':
+            base = LogisticRegression()
+            model_lr = CalibratedClassifierCV(base, cv=5)
+            model_lr.fit(combined_training_data, labels)
+
+            pickle.dump(model_lr, open("models/comb_model_logistic", "wb"))     
+            print("Saved model to model/")
+
+            #Test on Toefl
+            predictions = model_lr.predict(toefl_data)
+            probs = model_lr.predict_proba(toefl_data)[:, 1]
+
+            result_table.append(
+                [
+                    "Toefl91",
+                    round(f1_score(toefl_labels, predictions), 3),
+                    round(accuracy_score(toefl_labels, predictions), 3),
+                    round(roc_auc_score(toefl_labels, probs), 3),
+                ])
+            
+            #Test on Informatic Cup
+            predictions = model_lr.predict(informaticup_data)
+            probs = model_lr.predict_proba(informaticup_data)[:, 1]
+
+            result_table.append(
+                [
+                    "Informatic Cup",
+                    round(f1_score(informaticup_labels, predictions), 3),
+                    round(accuracy_score(informaticup_labels, predictions), 3),
+                    round(roc_auc_score(informaticup_labels, probs), 3),
+                ])
+        
+        if args.model_name == 'xgboost':
+            xgb_clf = xgb.XGBClassifier(objective="binary:logistic", random_state=42)
+            model_xgb = CalibratedClassifierCV(xgb_clf, cv=5)
+            model_xgb.fit(combined_training_data, labels)
+
+            pickle.dump(model_xgb, open("models/comb_model_xgb", "wb"))
+            print("Saved model to model/")
+
+            #Test on Toefl
+            predictions = model_xgb.predict(toefl_data)
+            probs = model_xgb.predict_proba(toefl_data)[:, 1]
+
+            result_table.append(
+                [
+                    "Toefl91",
+                    round(f1_score(toefl_labels, predictions), 3),
+                    round(accuracy_score(toefl_labels, predictions), 3),
+                    round(roc_auc_score(toefl_labels, probs), 3),
+                ])
+            
+            #Test on Informatic Cup
+            predictions = model_xgb.predict(informaticup_data)
+            probs = model_xgb.predict_proba(informaticup_data)[:, 1]
+
+            result_table.append(
+                [
+                    "Informatic Cup",
+                    round(f1_score(informaticup_labels, predictions), 3),
+                    round(accuracy_score(informaticup_labels, predictions), 3),
+                    round(roc_auc_score(informaticup_labels, probs), 3),
+                ])
+            
+        if args.model_name == 'random_forest':
+            rf = RandomForestClassifier(n_estimators=100, random_state=42)
+            model_rf = CalibratedClassifierCV(rf, cv=5)
+            model_rf.fit(combined_training_data, labels)
+
+            pickle.dump(model_rf, open("models/comb_model_rf", "wb"))
             print("Saved model to model/")
 
             #Test on Toefl

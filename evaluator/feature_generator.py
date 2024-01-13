@@ -111,7 +111,6 @@ def gb_mle_combined(data: str, gb_features = gb_features):
 
     return combined_features
 
-
 def gb_mle_combined_file(file, gb_features = gb_features):
     
     # Load data and featurize
@@ -191,3 +190,17 @@ def gb_mle_combined_file(file, gb_features = gb_features):
     combined_features = np.array(t_features + exp_features + mle_value)
 
     return combined_features
+
+def get_intrinsic_mle_file(file):
+    
+    # Load data and featurize
+    with open(file) as f:
+        data = f.read().strip()
+        # Strip data to first MAX_TOKENS tokens
+        tokens = enc.encode(data)[:MAX_TOKENS]
+        data = enc.decode(tokens).strip()
+
+    text_dim_estimator = IntrinsicDimensionEstimator(data)
+    mle_features = np.array(text_dim_estimator.get_mle())
+
+    return mle_features
