@@ -1,18 +1,20 @@
+trigram-logprobs v-< db-logprobs v-sub gpt2-logprobs s-l2
+unigram-logprobs v-mul trigram-logprobs v-> gpt2-logprobs s-avg-top-25
+trigram-logprobs v-add db-logprobs v-add gpt2-logprobs s-avg-top-25
 trigram-logprobs v-add db-logprobs v-mul gpt2-logprobs s-avg-top-25
+unigram-logprobs v-> trigram-logprobs v-mul gpt2-logprobs s-var
+unigram-logprobs v-add trigram-logprobs v-add gpt2-logprobs s-avg
+db-logprobs v-div trigram-logprobs v-div unigram-logprobs s-min
+db-logprobs v-mul gpt2-logprobs v-div unigram-logprobs s-avg-top-25
+gpt2-logprobs v-div unigram-logprobs s-max
+unigram-logprobs v-< trigram-logprobs v-add db-logprobs s-l2
+db-logprobs v-div gpt2-logprobs v-div unigram-logprobs s-min
+gpt2-logprobs v-div trigram-logprobs s-var
+trigram-logprobs v-mul db-logprobs v-add gpt2-logprobs s-l2
+unigram-logprobs v-sub db-logprobs v-< gpt2-logprobs s-l2
 unigram-logprobs v-add db-logprobs s-min
-trigram-logprobs v-div unigram-logprobs v-> gpt2-logprobs s-avg
-trigram-logprobs v-< gpt2-logprobs v-div trigram-logprobs s-l2
-db-logprobs v-div unigram-logprobs v-div trigram-logprobs s-min
-db-logprobs v-mul gpt2-logprobs v-div trigram-logprobs s-avg-top-25
-unigram-logprobs v-div gpt2-logprobs s-min
-db-logprobs v-div unigram-logprobs v-div gpt2-logprobs s-min
-unigram-logprobs s-l2
-unigram-logprobs v-div db-logprobs v-mul gpt2-logprobs s-max
-unigram-logprobs v-mul db-logprobs v-add gpt2-logprobs s-avg-top-25
-trigram-logprobs v-> gpt2-logprobs v-div trigram-logprobs s-avg
-unigram-logprobs v-div db-logprobs v-add gpt2-logprobs s-l2
-gpt2-logprobs v-div unigram-logprobs v-mul db-logprobs s-avg-top-25
-unigram-logprobs v-< db-logprobs s-avg
-trigram-logprobs v-div unigram-logprobs v-div trigram-logprobs s-var
-unigram-logprobs v-div db-logprobs v-sub gpt2-logprobs s-var
-unigram-logprobs v-mul trigram-logprobs s-min
+trigram-logprobs v-add db-logprobs v-< gpt2-logprobs s-len
+unigram-logprobs v-> trigram-logprobs v-add db-logprobs s-avg-top-25
+unigram-logprobs v-sub trigram-logprobs v-< db-logprobs s-var
+unigram-logprobs v-mul trigram-logprobs v-add db-logprobs s-avg-top-25
+gpt2-logprobs v-div unigram-logprobs v-add db-logprobs s-len
