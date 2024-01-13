@@ -82,6 +82,7 @@ parser.add_argument("--generate_symbolic_data_eval", action="store_true")
 
 parser.add_argument("--perform_feature_selection", action="store_true")
 parser.add_argument("--perform_feature_selection_four", action="store_true")
+parser.add_argument("--perform_feature_selection_large", action="store_true")
 parser.add_argument("--perform_feature_selection_lang", action="store_true")
 parser.add_argument("--perform_feature_selection_domain", action="store_true")
 
@@ -218,41 +219,3 @@ if __name__ == "__main__":
         with open("results/gb_best_features_wikip.txt", "w") as f:
             for feat in wikip_features:
                 f.write(feat + "\n")
-    
-    data, mu, sigma = normalize(
-        get_featurized_data(generate_dataset_fn, best_features), ret_mu_sigma=True
-    )
-
-    print(f"Best Features: {best_features}")
-    print(f"Data Shape: {data.shape}")
-
-    base = LogisticRegression()
-    model = CalibratedClassifierCV(base, cv=5)
-
-    if args.train_on_all_data:
-        model.fit(data, labels)
-
-        with open("models/gb_features.txt", "w") as f:
-            for feat in best_features:
-                f.write(feat + "\n")
-        pickle.dump(model, open("models/gb_model", "wb"))
-        pickle.dump(mu, open("models/gb_mu", "wb"))
-        pickle.dump(sigma, open("models/gb_sigma", "wb"))
-        pickle.dump(trigram_model, open(trigram_model_path, "wb"))
-
-        print("Saved model to model/")
-    else:
-        model.fit(data[train], labels[train])
-
-    predictions = model.predict(data[test])
-    probs = model.predict_proba(data[test])[:, 1]
-
-    result_table.append(
-        [
-            round(f1_score(labels[test], predictions), 3),
-            round(accuracy_score(labels[test], predictions), 3),
-            round(roc_auc_score(labels[test], probs), 3),
-        ]
-    )
-
-    print(tabulate(result_table, headers="firstrow", tablefmt="grid"))
