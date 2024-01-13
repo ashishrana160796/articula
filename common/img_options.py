@@ -151,9 +151,9 @@ class TestOptions():
         parser.add_argument('--noise_type', type=str,default=None, help='such as jpg, blur and resize')
         
         # path of processing model
-        parser.add_argument('--LNP_modelpath',type=str,default='./weights/preprocessing/sidd_rgb.pth',help='the path of LNP pre-trained model')
-        parser.add_argument('--DIRE_modelpath',type=str,default='weights/lsun_bedroom.pt',help='the path of DIRE pre-trained model')
-        parser.add_argument('--LGrad_modelpath', type=str,default='./weights/preprocessing/karras2019stylegan-bedrooms-256x256_discriminator.pth', help='the path of LGrad pre-trained model')
+        parser.add_argument('--LNP_modelpath',type=str,default='../weights/preprocessing/sidd_rgb.pth',help='the path of LNP pre-trained model')
+        parser.add_argument('--DIRE_modelpath',type=str,default='../weights/lsun_bedroom.pt',help='the path of DIRE pre-trained model')
+        parser.add_argument('--LGrad_modelpath', type=str,default='../weights/preprocessing/karras2019stylegan-bedrooms-256x256_discriminator.pth', help='the path of LGrad pre-trained model')
         
         self.initialized = True
 

@@ -39,7 +39,14 @@ def validate_PSM(model, data_loader):
             y_true.extend(label.flatten().tolist())
     return y_true, y_pred
 
-
+def predict_single_image(model, opt, img_path, label):
+    img = Image.open(img_path).convert('RGB')
+    img = custom_augment(img, opt)
+    img, target = process_img(img, opt, img_path, label)
+    in_tens = img.unsqueeze(0).cuda()
+    y_pred = model(in_tens).sigmoid().flatten().tolist()
+    return y_pred
+    
 def validate_single(model, opt):
     opt=get_processing_model(opt)
     real_img_list = loadpathslist(opt.dataroot,'0_real')        
