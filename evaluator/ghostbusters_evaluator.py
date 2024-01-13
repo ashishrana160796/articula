@@ -17,13 +17,13 @@ args = parser.parse_args()
 
 file = args.file
 MAX_TOKENS = 512
-best_features = open("models/gb_features.txt").read().strip().split("\n")
+best_features = open("models/gb_features_all.txt").read().strip().split("\n")
 
 # Load davinci tokenizer
 enc = tiktoken.encoding_for_model("davinci")
 
 # Load model
-model = pickle.load(open("models/gb_model", "rb"))
+model = pickle.load(open("models/gb_model_logistic", "rb"))
 mu = pickle.load(open("models/gb_mu", "rb"))
 sigma = pickle.load(open("models/gb_sigma", "rb"))
 
