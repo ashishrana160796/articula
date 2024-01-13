@@ -1,10 +1,12 @@
 import re
 import json
 import random
+import os
 import pandas as pd
 from tqdm import tqdm
 from pathlib import Path
 from typing import Optional
+import zipfile
 from collections import OrderedDict
 from common import constants as const
 
@@ -18,6 +20,25 @@ from nltk.tokenize import sent_tokenize
 def sentence_tokenizer(text, language):
     x = sent_tokenize(text, language=language)
     return x
+
+def extract_zip_to_folder(zip_file_path):
+    # Check if the file path is a zip file
+    if not zip_file_path.endswith('.zip'):
+        raise ValueError("The file is not a zip archive")
+
+    # Extract the folder name (without the .zip extension)
+    folder_name = os.path.splitext(os.path.basename(zip_file_path))[0]
+    folder_path = os.path.join(os.path.dirname(zip_file_path), folder_name)
+
+    # Create the directory if it doesn't exist
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
+
+    # Extract the zip file
+    with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
+        zip_ref.extractall(folder_path)
+
+    print(f"Extracted to {folder_path}")
 
 
 def preprocess_text(text: str):
@@ -164,6 +185,38 @@ def intrinsic_dim_dataset_to_files(data_path: str | Path, subset_fraction: Optio
                 with open(ai_data_path / f"{dataset_ext_list[1]}_{IDX_VAL}", "w") as f:
                     f.write(json_value['prefix']+" "+ ''.join(json_value['gen_completion']))
                 IDX_VAL += 1
+
+def gpt2_dataset_to_files(data_path: str | Path, subset_fraction: Optional[float]=1.):
+    """
+    It loads GPT2 generated datasets into text files with data subset folders,
+    with additional feature to load fraction of data subsets.
+    """
+    if not isinstance(data_path, Path):
+        data_path = Path(data_path)
+
+    csv_file_name = os.path.splitext(os.path.basename(data_path))[0]
+
+    # Read the CSV file
+    df = pd.read_csv(data_path)
+
+    # Create the main directory and the 'ai' subdirectory
+    main_dir = os.path.join(const.TRANSFORMED_DATA_SAVE_PATH, csv_file_name)
+    ai_dir = os.path.join(main_dir, 'ai')
+    os.makedirs(ai_dir, exist_ok=True)
+
+    # Function to write text to a file
+    def write_to_file(folder, filename, text):
+        with open(os.path.join(folder, filename), 'w', encoding='utf-8') as file:
+            file.write(preprocess_text(str(text)))
+
+    # Iterate over the DataFrame and create text files
+    for index, row in tqdm(df.iterrows()):
+        write_to_file(ai_dir, f'ai_text_dtr_{index + 1}.txt', row['ai_text_dtr'])
+        write_to_file(ai_dir, f'ai_text_stc_{index + 1}.txt', row['ai_text_stc'])
+        write_to_file(ai_dir, f'ai_text_con_{index + 1}.txt', row['ai_text_con'])
+
+    print('Text files created successfully.')
+
 
 if __name__ == '__main__':
     # intrinsic_dim_dataset_to_csv(const.INTRINSIC_DIM_DATASET)

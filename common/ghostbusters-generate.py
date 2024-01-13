@@ -64,6 +64,9 @@ if __name__ == "__main__":
             Dataset("normal", "data/transformed-model-input-datasets/intrinsic_dim_data/reddit/ai"),
             Dataset("normal", "data/transformed-model-input-datasets/intrinsic_dim_data/wikip/human"),
             Dataset("normal", "data/transformed-model-input-datasets/intrinsic_dim_data/wikip/ai"),
+            Dataset("normal", "data/transformed-model-input-datasets/generated_gpt2_en_data/ai"),
+            Dataset("normal", "data/transformed-model-input-datasets/generated_gpt2_de_data_small/ai"),
+            Dataset("normal", "data/transformed-model-input-datasets/generated_gpt2_de_data_large/ai")
         ]
         generate_logprobs(get_generate_dataset(*datasets), model_name = args.model)
 
