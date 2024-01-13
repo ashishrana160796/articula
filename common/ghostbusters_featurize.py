@@ -183,7 +183,7 @@ def select_features(exp_to_data, labels, verbose=True, to_normalize=True, indice
                 Best Feature: {best_exp}, New Score: {best_score}"
             )
 
-        if best_score <= curr:
+        if best_score <= curr - 0.0009:
             break
         else:
             best_features.append(best_exp)
