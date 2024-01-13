@@ -1,3 +1,6 @@
+import nltk
+nltk.download('punkt')
+
 from tqdm import tqdm
 from typing import List
 from pathlib import Path

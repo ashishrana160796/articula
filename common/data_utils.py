@@ -10,6 +10,15 @@ from common import constants as const
 
 random.seed(16) # fixing the random seed for retrieving fixed data subset
 
+import nltk
+nltk.download('punkt')
+
+from nltk.tokenize import sent_tokenize
+
+def sentence_tokenizer(text, language):
+    x = sent_tokenize(text, language=language)
+    return x
+
 
 def preprocess_text(text: str):
     """

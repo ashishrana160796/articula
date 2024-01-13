@@ -1,32 +1,30 @@
 import nltk
 nltk.download('punkt')
 
-from nltk.tokenize import sent_tokenize
+import random
 from typing import List
 from pathlib import Path
 from common import constants as const
 from tqdm import tqdm
+from copy import deepcopy
 
 from models.sent_paraphraser import SentParaphraser
 from models.gpt_generators import GPT2Generator
 from models.intrinsic_dim_estimator import IntrinsicDimensionEstimator
 from models.detector_models import LanguageDetector
+from common.data_utils import preprocess_text, sentence_tokenizer
 
-
-def sentence_tokenizer(text, language):
-    x = sent_tokenize(text, language=language)
-    return x
-
+random.seed(16)
 
 class BaselineTextSpoofer():
     def __init__(
         self,
         data: str | List,
         model_path: str | Path=const.PRE_TRAINED_MODELS,
-        num_return_sequences: int=4,
+        num_return_sequences: int=3,
         num_beams: int=1,
         add_info_mutation: bool=True,
-        add_info_mut_prob: float=0.25,
+        add_info_mut_prob: float=0.1,
     ):
         """
         The T5 paraphraser model is used to change individual sentences iteratively and parallely obtaining feedback via the text detectors.
@@ -54,29 +52,79 @@ class BaselineTextSpoofer():
         # detect the language, and delete the detector instance
         lang_detector = LanguageDetector(self.data)
         self.languages = lang_detector.detect_language()
+        self.punkt_lang_map = {'en': 'english', 'de': 'german'}
+        self.languages = [self.punkt_lang_map[lang_code] for lang_code in self.languages]
         del lang_detector
 
 
-    def _spoof_text_single(text, language):
+    def _spoof_text_single(self, text, language): # greedy implementation
         text_sent_list = sentence_tokenizer(text, language)
-        
+        best_spoofing_score = -1000
+        best_spoof_text = " ".join(text_sent_list)
+        mut_lits = [1 if random.uniform(0, 1) <= self.add_info_mut_prob else 0 for x in range(0, len(text_sent_list))]
+        sent_parahraser = SentParaphraser(data="",num_return_sequences=self.num_return_sequences, num_beams=self.num_beams)
+        paraphrased_outputs = []
+        for text_sent in tqdm(text_sent_list, desc="generating phrasing alternatives..."):
+            sent_parahraser.data = [text_sent]
+            paraphrased_outputs.append(sent_parahraser.paraphrase_text()[0])
+        del sent_parahraser
+        dim_estimator = IntrinsicDimensionEstimator("")
+        for para_sents, idx in tqdm(zip(paraphrased_outputs, list(range(len(paraphrased_outputs)))), desc="selecting best phrasing alternatives..."):
+            for para_sent in para_sents:
+                tmp_text_sent_list = deepcopy(text_sent_list)
+                tmp_text_sent_list[idx] = para_sent
+                print(tmp_text_sent_list)
+                tmp_spoof_text = " ".join(tmp_text_sent_list)
+                dim_estimator.data = [tmp_spoof_text]
+                tmp_spoofing_score = dim_estimator.get_mle().ravel()[0]
+                if tmp_spoofing_score > best_spoofing_score:
+                    best_spoofing_score = tmp_spoofing_score
+                    text_sent_list[idx] = para_sent
+                
+        return " ".join(text_sent_list), best_spoofing_score
+
 
     def spoof_text(self):
         spoof_text_list = []
-        for text, text_lang in tqdm(self.data, self.languages):
-            spoof_text_list.append(self._spoof_text_single(text, text_lang))
+        for text, text_lang in zip(self.data, self.languages):
+            spoof_text_list.append(self._spoof_text_single(preprocess_text(text), text_lang))
         return spoof_text_list
 
 
 if __name__ == '__main__':
-    input_data = [
-            "Berlin, die Hauptstadt Deutschlands, ist eine dynamische Stadt, die sowohl eine reiche Geschichte "
-            "als auch eine lebendige zeitgenössische Kultur verkörpert. Ihr ikonisches Brandenburger Tor steht "
-            "als Symbol für Einheit und Versöhnung, während die Überreste der Berliner Mauer eine eindringliche "
-            "Erinnerung an die geteilte Vergangenheit der Stadt darstellen.",
-            "Jupiter, the largest planet in our solar system, has 79 known moons as of my last knowledge "
-            "update in September 2021. However, new moons may have been discovered since then as space "
-            "exploration and observation continue."
-        ]
-    print(sentence_tokenizer(input_data[0], language='german'))
-    print(sentence_tokenizer(input_data[1], language='english'))
+    # input_data = [
+    #         "Berlin, die Hauptstadt Deutschlands, ist eine dynamische Stadt, die sowohl eine reiche Geschichte "
+    #         "als auch eine lebendige zeitgenössische Kultur verkörpert. Ihr ikonisches Brandenburger Tor steht "
+    #         "als Symbol für Einheit und Versöhnung, während die Überreste der Berliner Mauer eine eindringliche "
+    #         "Erinnerung an die geteilte Vergangenheit der Stadt darstellen.",
+    #         "Jupiter, the largest planet in our solar system, has 79 known moons as of my last knowledge "
+    #         "update in September 2021. However, new moons may have been discovered since then as space "
+    #         "exploration and observation continue."
+    #     ]
+    # print(sentence_tokenizer(input_data[0], language='german'))
+    # print(sentence_tokenizer(input_data[1], language='english'))
+    input_text = ["Sehr geehrte Damen und Herren, "
+            ""
+            "mit großem Interesse bewerbe ich mich für die Stelle als Fachangestellter im Bürohandel in Ihrem "
+            "Unternehmen. Aufgrund meiner fundierten Erfahrung im Bürohandel und meiner Begeisterung für die "
+            "Organisation und Verwaltung von Büromaterialien, sehe ich diese Position als eine hervorragende Gelegenheit, "
+            "meine Fähigkeiten und Fachkenntnisse einzubringen."
+            ""
+            "Während meiner bisherigen beruflichen Laufbahn habe ich umfangreiche Kenntnisse im Einkauf und in der "
+            "Lagerverwaltung von Bürobedarf erworben. Ich bin vertraut mit verschiedenen Bürosoftwareanwendungen und "
+            "habe eine ausgezeichnete Fähigkeit zur Kundenbetreuung entwickelt. Zudem bin ich äußerst organisiert, "
+            "detailorientiert und arbeite effizient, um sicherzustellen, dass die Büroprodukte stets verfügbar "
+            "sind und den Bedürfnissen der Kunden gerecht werden."
+            ""
+            "Meine Leidenschaft für den Bürohandel und mein Engagement für exzellenten Kundenservice haben mich dazu "
+            "motiviert, stets auf dem neuesten Stand der Entwicklungen in der Branche zu bleiben. Ich bin überzeugt, "
+            "dass ich eine wertvolle Ergänzung für Ihr Team sein kann und freue mich darauf, dazu beizutragen, "
+            "die hohen Standards Ihres Unternehmens aufrechtzuerhalten."
+            ""
+            "Vielen Dank für Ihre Zeit und die Berücksichtigung meiner Bewerbung. Ich stehe Ihnen gerne für ein "
+            "persönliches Gespräch zur Verfügung, um meine Qualifikationen und Motivation weiter zu erläutern. "
+            ""
+            "Mit freundlichen Grüßen,"
+            "[Ihr Name]",]
+    text_spoofer = BaselineTextSpoofer(input_text)
+    print(text_spoofer.spoof_text())
