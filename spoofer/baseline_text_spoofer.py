@@ -24,7 +24,7 @@ class BaselineTextSpoofer():
         num_return_sequences: int=3,
         num_beams: int=1,
         add_info_mutation: bool=True,
-        add_info_mut_prob: float=0.1,
+        add_info_mut_prob: float=0.5,
     ):
         """
         The T5 paraphraser model is used to change individual sentences iteratively and parallely obtaining feedback via the text detectors.
@@ -60,27 +60,48 @@ class BaselineTextSpoofer():
     def _spoof_text_single(self, text, language): # greedy implementation
         text_sent_list = sentence_tokenizer(text, language)
         best_spoofing_score = -1000
-        best_spoof_text = " ".join(text_sent_list)
-        mut_lits = [1 if random.uniform(0, 1) <= self.add_info_mut_prob else 0 for x in range(0, len(text_sent_list))]
+        mut_list = [1 if random.uniform(0, 1) <= self.add_info_mut_prob else 0 for x in range(0, len(text_sent_list))]
         sent_parahraser = SentParaphraser(data="",num_return_sequences=self.num_return_sequences, num_beams=self.num_beams)
         paraphrased_outputs = []
         for text_sent in tqdm(text_sent_list, desc="generating phrasing alternatives..."):
             sent_parahraser.data = [text_sent]
             paraphrased_outputs.append(sent_parahraser.paraphrase_text()[0])
         del sent_parahraser
+
+        if self.add_info_mutation:
+            max_length = max([len(tmp_sent.split(" ")) if mut_flg == 1 else 0 for tmp_sent, mut_flg in zip(text_sent_list, mut_list)])
+            min_length = min([len(tmp_sent.split(" ")) if mut_flg == 1 else 0 for tmp_sent, mut_flg in zip(text_sent_list, mut_list)])
+            gpt_language = "de" if language == "german" else "en"
+            gpt_generator = GPT2Generator(
+                                        data="",
+                                        min_length=int(0.75 * min_length),
+                                        max_length=int(3 * max_length),
+                                        language=gpt_language,
+                                        gen_method='con',
+                                        early_stopping=True,
+                                    )
+            gpt_prompt = 'Paraphrase the text with additional relevant information: '
+            if gpt_language == 'de':
+                gpt_prompt = 'Paraphrasieren Sie den Text mit zusätzlichen relevanten Informationen: '
+            for tmp_sent, para_sent_list, mut_flg in tqdm(zip(text_sent_list, paraphrased_outputs, mut_list), desc="generating additional information alternatives..."):
+                if mut_flg == 1:
+                    gpt_generator.data = [f'{gpt_prompt}"{tmp_sent}"']
+                    tmp_gen_text = tmp_sent+" "+ preprocess_text(gpt_generator.generate_text()[0].replace(f'{gpt_prompt}"{tmp_sent}"',""))
+                    para_sent_list.append(tmp_gen_text)
+            del gpt_generator
+
         dim_estimator = IntrinsicDimensionEstimator("")
         for para_sents, idx in tqdm(zip(paraphrased_outputs, list(range(len(paraphrased_outputs)))), desc="selecting best phrasing alternatives..."):
             for para_sent in para_sents:
                 tmp_text_sent_list = deepcopy(text_sent_list)
                 tmp_text_sent_list[idx] = para_sent
-                print(tmp_text_sent_list)
                 tmp_spoof_text = " ".join(tmp_text_sent_list)
                 dim_estimator.data = [tmp_spoof_text]
                 tmp_spoofing_score = dim_estimator.get_mle().ravel()[0]
                 if tmp_spoofing_score > best_spoofing_score:
                     best_spoofing_score = tmp_spoofing_score
                     text_sent_list[idx] = para_sent
-                
+
         return " ".join(text_sent_list), best_spoofing_score
 
 
@@ -126,5 +147,5 @@ if __name__ == '__main__':
             ""
             "Mit freundlichen Grüßen,"
             "[Ihr Name]",]
-    text_spoofer = BaselineTextSpoofer(input_text)
+    text_spoofer = BaselineTextSpoofer(input_text, add_info_mutation=True)
     print(text_spoofer.spoof_text())
