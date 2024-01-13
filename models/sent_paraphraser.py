@@ -1,5 +1,5 @@
 from tqdm import tqdm
-from typing import Dict, List
+from typing import List
 from pathlib import Path
 from common import constants as const
 
@@ -16,9 +16,9 @@ class SentParaphraser():
             top_k: int=120,
             top_p: float=0.975,
             early_stopping: bool=True,
-            num_return_sequences: int=5,
+            num_return_sequences: int=3,
             penalty_alpha: float=0.6,
-            num_beams: int=25,
+            num_beams: int=1,
         ):
         """
         The T5 paraphraser model for multiple text data inputs which generate top-N paraphrased outputs.
@@ -54,7 +54,7 @@ class SentParaphraser():
         self.model = AutoModelForSeq2SeqLM.from_pretrained(self.model_name, cache_dir=self.model_path)
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, cache_dir=self.model_path)
 
-    def _paraphrase_text_single(self, input_text) -> Dict[str, float]:
+    def _paraphrase_text_single(self, input_text):
         encoding = self.tokenizer.encode_plus(input_text, pad_to_max_length=True, return_tensors="pt")
         input_ids, attention_masks = encoding["input_ids"], encoding["attention_mask"]
         outputs = self.model.generate(
@@ -90,5 +90,12 @@ if __name__ == '__main__':
         ]
 
     sent_paraphraser = SentParaphraser(input_data)
+    print(sent_paraphraser.paraphrase_text())
+    sent_paraphraser.data = input_data = [
+            "Jupiter, the largest planet in our solar system, has 79 known moons as of my last knowledge "
+            "update in September 2021. However, new moons may have been discovered since then as space "
+            "exploration and observation continue.",
+            "Frühling erwacht leise, Blumen blühen im Sonnenlicht, Natur tanzt im Wind.",
+        ]
     print(sent_paraphraser.paraphrase_text())
     del sent_paraphraser

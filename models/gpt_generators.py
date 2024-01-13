@@ -74,12 +74,16 @@ class GPT2Generator():
         return gen_text_list
 
 if __name__ == '__main__':
-    input_text = 'Paraphrase the text: "I have good person."'
+    input_text = 'Paraphrase the text with additional relevant information: ' \
+                 '"Jupiter, the largest planet in our solar system, has 79 known moons as of my last knowledge update in September 2021."'
     generator_en = GPT2Generator(input_text, min_length=32, gen_method='con')
     print(generator_en.generate_text())
+    print(generator_en.generate_text()[0].replace(input_text,""))
     del generator_en
 
-    input_text = 'Paraphrasieren Sie den Text: "Ich habe einen guten Menschen."'
+    input_text = 'Paraphrasieren Sie den Text mit zusätzlichen relevanten Informationen: ' \
+                 '"Frühling erwacht leise, Blumen blühen im Sonnenlicht, Natur tanzt im Wind."'
     generator_de = GPT2Generator(input_text, language='de', min_length=32, gen_method='con')
     print(generator_de.generate_text())
+    print(generator_de.generate_text()[0].replace(input_text,""))
     del generator_de
