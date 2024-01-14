@@ -156,12 +156,12 @@ if __name__ == '__main__':
     
     text_dim_estimator = IntrinsicDimensionEstimator(input_texts)
     print(text_dim_estimator.lang_lists)
-    print(text_dim_estimator.get_mle())
-    print(text_dim_estimator.get_phd())
-    print(text_dim_estimator.get_mle().ravel()[0], text_dim_estimator.get_mle().ravel()[1])
+    print(text_dim_estimator.get_mle().ravel(), type(text_dim_estimator.get_mle().ravel()), type(list(text_dim_estimator.get_mle().ravel())))
+    # print(text_dim_estimator.get_phd())
+    # print(text_dim_estimator.get_mle().ravel()[0], text_dim_estimator.get_mle().ravel()[1])
     del text_dim_estimator
-    input_data = load_informaticup_text_data()
-    text_dim_estimator = IntrinsicDimensionEstimator(input_data)
-    print(text_dim_estimator.lang_lists)
-    print(text_dim_estimator.get_mle())
-    del text_dim_estimator
+    # input_data = load_informaticup_text_data()
+    # text_dim_estimator = IntrinsicDimensionEstimator(input_data)
+    # print(text_dim_estimator.lang_lists)
+    # print(text_dim_estimator.get_mle())
+    # del text_dim_estimator

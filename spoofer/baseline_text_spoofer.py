@@ -23,7 +23,7 @@ class BaselineTextSpoofer():
         model_path: str | Path=const.PRE_TRAINED_MODELS,
         num_return_sequences: int=3,
         num_beams: int=1,
-        add_info_mutation: bool=True,
+        add_info_mutation: bool=False,
         add_info_mut_prob: float=0.5,
     ):
         """
@@ -102,7 +102,7 @@ class BaselineTextSpoofer():
                     best_spoofing_score = tmp_spoofing_score
                     text_sent_list[idx] = para_sent
 
-        return " ".join(text_sent_list), best_spoofing_score
+        return (" ".join(text_sent_list), best_spoofing_score)
 
 
     def spoof_text(self):
