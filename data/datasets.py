@@ -85,6 +85,37 @@ def custom_resize(img, opt):
     img = torchvision.transforms.Resize((opt.loadSize,opt.loadSize))(img) 
     return img
 
+def spatial_to_freq(img, probability_threshold):
+    image = copy.deepcopy(img)
+    # Converting from spatial domain to frequency domain
+    image = fftpack.dct(image, type=2, norm="ortho", axis=0)
+    image = fftpack.dct(image, type=2, norm="ortho", axis=1)
+
+    # Randomly zero out the frequency with a given probaility
+    np.random.seed(42)
+    random_mask = np.random.rand(*image.shape) < probability_threshold
+    image[random_mask] = 0
+
+    # Converting from frequency domain to spatial domain
+    reconstructed_image = fftpack.idct(fftpack.idct(image, type=2, norm="ortho", axis=0), type=2, norm="ortho", axis=1)
+    reconstructed_image = np.clip(reconstructed_image, 0, 255)
+    reconstructed_image = reconstructed_image.astype(np.uint8)
+
+    return reconstructed_image
+    
+def add_salt_and_pepper_noise(img, density=0.01):
+    img_array = np.array(img)
+    mask = np.random.choice([0, 1, 255], size=img_array.shape[:2], p=[1 - density / 2, density, density / 2])
+    noisy_img_array = np.clip(img_array + mask[:, :, np.newaxis], 0, 255).astype(np.uint8)
+    return noisy_img_array
+
+
+
+def add_gaussian_noise(img, intensity=10):
+    img_array = np.array(img)
+    noise = np.random.normal(scale=intensity, size=img_array.shape)
+    noisy_img_array = np.clip(img_array + noise, 0, 255).astype(np.uint8)
+    return noisy_img_array
 
 def custom_augment(img, opt):
     
@@ -109,8 +140,17 @@ def custom_augment(img, opt):
         method = sample_discrete(opt.jpg_method)
         qual = sample_discrete(opt.jpg_qual)
         img = jpeg_from_key(img, qual, method)
-    
+
+    if opt.freq and (not opt.detect_method == 'FreDect'):
+        img = spatial_to_freq(img, opt.freq_prob)
+    if opt.gaussian_noise:
+        img = add_gaussian_noise(img, opt.gaus_intensity)
+    if opt.salt_pepper_noise:
+        img = add_salt_and_pepper_noise(img, opt.s_p_density)
+         
     return Image.fromarray(img)
+    
+
 
 
 def loadpathslist(root,flag):

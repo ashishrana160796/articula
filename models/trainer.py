@@ -1,11 +1,18 @@
 import functools
 import torch
 import torch.nn as nn
-from networks.resnet import resnet50
+from resnet import resnet50
+import os
+import sys
+from base_model import BaseModel, init_weights
 
-from networks.base_model import BaseModel, init_weights
+current_directory = os.path.dirname(os.path.realpath(__file__))
 
-from util import get_model
+sys.path.append(current_directory)
+sys.path.append(current_directory + '/../common')
+
+
+from img_utils import get_model
 
 class Trainer(BaseModel):
     def name(self):

@@ -26,7 +26,7 @@ class TrainOptions():
         parser.add_argument('--no_crop', action='store_true')
         parser.add_argument('--no_resize', action='store_true')
         parser.add_argument('--no_flip', action='store_true', help='if specified, do not flip the images for data augmentation')
-
+        
         # parser.add_argument('--is_single',action='store_true',help='evaluate image by image')
         parser.add_argument('--detect_method', type=str,default='CNNSpot', help='choose the detection method')
         parser.add_argument('--dataroot', default='/hotdata/share/AIGCDetect', help='path to images (should have subfolders trainA, trainB, valA, valB, etc)')
@@ -144,7 +144,16 @@ class TestOptions():
         parser.add_argument('--no_crop', action='store_true')
         parser.add_argument('--no_resize', action='store_true')
         parser.add_argument('--no_flip', action='store_true', help='if specified, do not flip the images for data augmentation')
+        parser.add_argument('--freq', action='store_true', default=False, help='if not given Freq, it wont analyze in frequency domain')
+        parser.add_argument('--freq_prob', type=float, default=0.1, help='probability with which the freq values are zeroed out')
 
+        parser.add_argument('--gaussian_noise', action='store_true', default=False, help='if not given Gaussian, it wont apply Gaussian')
+        parser.add_argument('--gaus_intensity', type=float, default=10, help='Intensity controls the scale of the noise added to the image')
+
+        parser.add_argument('--salt_pepper_noise', action='store_true', default=False, help='If provided, apply salt and pepper texture to the image')
+        parser.add_argument('--s_p_density', type=float, default=10, help='Intensity controls the scale of the noise texture added to the image')
+
+        
         parser.add_argument('--model_path',type=str,default='./weights/classifier/CNNSpot.pth',help='the path of detection model')
         # parser.add_argument('--is_single',action='store_true',help='evaluate image by image')
         parser.add_argument('--detect_method', type=str,default='CNNSpot', help='choose the detection method')

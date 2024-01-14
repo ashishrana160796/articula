@@ -269,7 +269,25 @@ def processing_LGrad(img,gen_model,opt):
 
 
 
-
+def dct2_wrapper(image, mean, var, probability_threshold, log=True, epsilon=1e-1):
+    """apply 2d-DCT to image of shape (H, W, C) uint8
+    """
+    # dct
+    image = np.array(image)
+    image = fftpack.dct(image, type=2, norm="ortho", axis=0)
+    image = fftpack.dct(image, type=2, norm="ortho", axis=1)
+    # Set a random seed for reproducibility
+    np.random.seed(42)
+    random_mask = np.random.rand(*image.shape) < probability_threshold
+    image[random_mask] = 0
+    # log scale
+    if log:
+        image = np.abs(image)
+        image += epsilon  # no zero in log
+        image = np.log(image)
+    # normalize
+    image = (image - mean) / np.sqrt(var)
+    return image
 
 def dct2_wrapper(image, mean, var, log=True, epsilon=1e-12):
     """apply 2d-DCT to image of shape (H, W, C) uint8
@@ -296,7 +314,12 @@ def processing_DCT(img,opt):
 
     img = transforms.Resize(opt.loadSize)(img)
     img = transforms.CenterCrop(opt.CropSize)(img)
-    cropped_img = torch.from_numpy(dct2_wrapper(img, opt.dct_mean, opt.dct_var)).permute(2,0,1).to(dtype=torch.float)
+
+    if opt.freq:
+        cropped_img = torch.from_numpy(dct2_wrapper(img, opt.dct_mean, opt.dct_var, opt.freq_prob)).permute(2,0,1).to(dtype=torch.float)
+    else:
+        cropped_img = torch.from_numpy(dct2_wrapper(img, opt.dct_mean, opt.dct_var)).permute(2,0,1).to(dtype=torch.float)
+    
     return cropped_img
 
 
