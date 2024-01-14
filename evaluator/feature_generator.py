@@ -45,7 +45,7 @@ def gb_mle_combined(data: str, gb_features = gb_features):
     tokens = enc.encode(data)[:MAX_TOKENS]
     data = enc.decode(tokens).strip()
 
-    print(f"Input: {data}")
+    # print(f"Input: {data}")
 
     trigram = np.array(score_ngram(data, trigram_model, enc.encode, n=3, strip_first=False))
     unigram = np.array(score_ngram(data, trigram_model.base, enc.encode, n=1, strip_first=False))
