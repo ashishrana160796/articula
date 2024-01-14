@@ -76,3 +76,4 @@ if __name__ == "__main__":
         ]
 
         generate_logprobs(get_generate_dataset(*other_datasets), model_name = args.model)
+
