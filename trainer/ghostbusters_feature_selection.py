@@ -86,7 +86,6 @@ parser.add_argument("--perform_feature_selection_large", action="store_true")
 parser.add_argument("--perform_feature_selection_lang", action="store_true")
 parser.add_argument("--perform_feature_selection_domain", action="store_true")
 
-parser.add_argument("--train_on_all_data", action="store_true")
 parser.add_argument("--seed", type=int, default=2024)
 args = parser.parse_args()
 

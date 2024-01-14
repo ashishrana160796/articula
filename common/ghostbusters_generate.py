@@ -8,16 +8,6 @@ import numpy as np
 import string
 import torch
 
-#from nltk.corpus import wordnet
-#from datasets import load_dataset
-#from nltk.tokenize.treebank import TreebankWordDetokenizer
-#from tenacity import (
-#    retry,
-#    stop_after_attempt,
-#    wait_random_exponential,
-#)
-#from transformers import PegasusForConditionalGeneration, PegasusTokenizer
-
 from common.ghostbusters_load import Dataset, get_generate_dataset
 from common.ghostbusters_write_logprobs import write_logprobs_gpt2, write_logprobs_db, write_logprobs_xlmr
 from common.ghostbusters_symbolic import convert_file_to_logprob_file
