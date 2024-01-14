@@ -6,41 +6,32 @@ This repository presents implementation for the tool Articula: AI-generated Cont
 
 1. For setting up the project, use the `source project-setup.sh` command, and it will set up a virtual environment with prerequisite packages.
 
-### Pull Request Instructions
-
-1. Create a specific branch named in the format like `feature/intrinsic-dimension-model`, highlighting the name of the feature model in progress and make a pull request.
-
-2. Always `rebase` the your working branch before making a PR and add `--force-with-lease` based branch push. Also, we highlight the steps needed for making a PR below assuming that you are working on your feature branch and you can opt to remove conflicts via your IDE while doing the `rebase` for your branch.
-
-```
-git checkout main
-git pull origin
-git checkout feature/intrinsic-dimension-model
-git rebase main
-git push origin feature/intrinsic-dimension-model --force-with-lease
-```
-
-3. Finally, after reviewing the pull request, please `squash` all the commits during the merge into the main branch. Also, add in meaningful PR heading and joint-commit message for all your intermediate commits.
-
-__Note:__ Please, do not push directly onto the main branch, follow the proposed conventions, and also add another person as reviewer of your code.
-
-### Training and Testing the text detector
+### Training and Testing the text detector & spoofer
 
 1. Extract the zip folders.
-2. Generate the log probability files required for the training data.
+2. Generate the log probability files required for the training data. These scripts generate token level log probabilities which are used in vector combinations to create features. The models used to get log probabilities are GPT2 and DistilBert.
 ```
 python common/ghostbusters_generate.py --logprobs
 python common/ghostbusters_generate.py --logprob_other
 ```
-3. Generate the symbolic data which will be used to perform feature selection
+3. Generate the symbolic data which will be used to perform feature selection. The symbolic data file consists of values of all possible features based on vector and scaler combination of log probabilities. This will be used for feature selection instead of calculating it at every step. 
+Possible Tuning options: generate_symbolic_data_four (increases the depth of feature combinations) 
 ```
 python trainer/ghostbuster_feature_selection.py --generate_symbolic_data
 ```
-4. Perform Feature Selection
+4. Perform Feature Selection. Based on the generated symbolic data this script selects important features from all possible features which are important to detect if a text is written by AI or not. The list of features will be saved and used further to train a classifier.
+Possible Tuning options:
+    1. perform_feature_selection_four (feature selection based on the increased depth)
+    2. perform_feature_selection_large (feature selection based only on large text datasets)
+    3. perform_feature_selection_lang (seperate feature selection for each language)
+    4. perform_feature_selection_domain (seperate feature selection for different domains of training data)
 ```
 python trainer/ghostbuster_feature_selection.py --perform_feature_selection
 ```
-5. Train the classifier (Logistic, XGBoost or Random Forest)
+5. Train the classifier (Logistic, XGBoost or Random Forest). This script uses our training data and the best selected features to train a classifier for detecting AI generated text. There are 3 different scenarios: 
+    1. Ghostbusters: Trains a classifier only using the best features found from the above steps
+    2. Intrinsic Dimensionality MLE: Trains a classifier using MLE Value from Intrinsic Dimensionality model (models/intrinsic_dim_estimator.py).
+    3. Combined: Trains a classifier using both, the features from ghostbusters model and the MLE value from Intrinsic Dimensionality model.
 ```
 python trainer/ghostbuster-train.py --model_name "logistic" --combined
 ```
@@ -48,6 +39,7 @@ python trainer/ghostbuster-train.py --model_name "logistic" --combined
 ```
 python app/text_app.py --input "your text"
 ```
+
 
 ## 1. Dataset
 The experimentation utilizes the bensvmark datasets employed by previous state-of-the-art (sota) models. In this project, a custom model was trained on a subset of images extracted from all these models, creating a diverse dataset.
@@ -89,3 +81,21 @@ same can be run using the following script
 cd evaluator/eval_different_attacks.sh
 ./eval_different_attacks.sh
 ````
+=======
+### Pull Request Instructions
+
+1. Create a specific branch named in the format like `feature/intrinsic-dimension-model`, highlighting the name of the feature model in progress and make a pull request.
+
+2. Always `rebase` the your working branch before making a PR and add `--force-with-lease` based branch push. Also, we highlight the steps needed for making a PR below assuming that you are working on your feature branch and you can opt to remove conflicts via your IDE while doing the `rebase` for your branch.
+
+```
+git checkout main
+git pull origin
+git checkout feature/intrinsic-dimension-model
+git rebase main
+git push origin feature/intrinsic-dimension-model --force-with-lease
+```
+
+3. Finally, after reviewing the pull request, please `squash` all the commits during the merge into the main branch. Also, add in meaningful PR heading and joint-commit message for all your intermediate commits.
+
+__Note:__ Please, do not push directly onto the main branch, follow the proposed conventions, and also add another person as reviewer of your code.
