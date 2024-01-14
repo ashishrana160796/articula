@@ -122,7 +122,7 @@ class IntrinsicDimensionEstimator():
         return solver.fit_transform(outp[0][0].cpu().numpy()[1:-1])
 
     def _get_mle_single_multi_ling(self, text, solver):
-        inputs = self.lang_detector.tokenizer(preprocess_text(text), truncation=True, max_length=512, return_tensors="pt").to(self.device)
+        inputs = self.lang_detector.tokenizer(preprocess_text(text), truncation=True, max_length=512, return_tensors="pt")
         with torch.no_grad():
             outp = self.lang_detector.model(**inputs)
 

@@ -9,7 +9,7 @@ model = pickle.load(open("models/comb_model_rf", "rb"))
 mu = pickle.load(open("models/comb_mu", "rb"))
 sigma = pickle.load(open("models/comb_sigma", "rb"))
 
-def text_detector(text):
+def fool_detector_text(text):
 
     features = gb_mle_combined(text)
     normalized_features = (features - mu) / sigma
@@ -49,4 +49,4 @@ if __name__ == '__main__':
             ""
             "Mit freundlichen Grüßen,"
             "[Ihr Name]",]
-    text_detector(input_text)
+    fool_detector_text(input_text)

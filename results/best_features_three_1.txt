@@ -1,0 +1,25 @@
+unigram-logprobs v-> trigram-logprobs v-sub gpt2-logprobs s-l2
+unigram-logprobs v-mul trigram-logprobs v-> gpt2-logprobs s-avg-top-25
+unigram-logprobs v-> trigram-logprobs v-add gpt2-logprobs s-var
+unigram-logprobs v-div trigram-logprobs v-> db-logprobs s-avg-top-25
+trigram-logprobs v-add db-logprobs v-add gpt2-logprobs s-max
+trigram-logprobs v-mul db-logprobs v-add gpt2-logprobs s-max
+unigram-logprobs v-> trigram-logprobs v-sub gpt2-logprobs s-min
+gpt2-logprobs v-div trigram-logprobs v-sub db-logprobs s-avg-top-25
+unigram-logprobs v-div trigram-logprobs v-< db-logprobs s-l2
+trigram-logprobs v-add gpt2-logprobs v-div trigram-logprobs s-avg
+db-logprobs v-div trigram-logprobs v-div gpt2-logprobs s-min
+trigram-logprobs v-mul db-logprobs v-add gpt2-logprobs s-avg
+unigram-logprobs v-mul db-logprobs s-var
+trigram-logprobs v-mul db-logprobs v-add gpt2-logprobs s-l2
+unigram-logprobs v-> trigram-logprobs v-sub db-logprobs s-avg-top-25
+unigram-logprobs v-> trigram-logprobs v-< gpt2-logprobs s-avg
+unigram-logprobs s-var
+unigram-logprobs s-l2
+unigram-logprobs s-avg-top-25
+unigram-logprobs v-< trigram-logprobs v-div gpt2-logprobs s-var
+db-logprobs v-div unigram-logprobs v-mul gpt2-logprobs s-avg-top-25
+gpt2-logprobs v-div unigram-logprobs v-sub db-logprobs s-var
+unigram-logprobs v-div trigram-logprobs v-> db-logprobs s-avg
+gpt2-logprobs v-div unigram-logprobs v-add trigram-logprobs s-max
+unigram-logprobs v-mul trigram-logprobs v-> db-logprobs s-max
