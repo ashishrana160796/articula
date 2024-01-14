@@ -37,6 +37,7 @@ class IntrinsicDimensionEstimator():
             n_reruns: int=3,
             n_points: int=9,
             n_points_min: int=3,
+            device: str = "cpu"
         ):
         """
         The intrinsic dimension estimator for the input text string or list using PHD or MLE metrics.
@@ -66,15 +67,16 @@ class IntrinsicDimensionEstimator():
         self.n_points = n_points
         self.n_points_min = n_points_min
         self.metric = metric
+        self.device = device
     
         # loading the language model and its corresponding tokenizer
         self.tokenizer = RobertaTokenizer.from_pretrained(self.model_name, cache_dir=self.model_path)
-        self.model = RobertaModel.from_pretrained(self.model_name, cache_dir=self.model_path)
+        self.model = RobertaModel.from_pretrained(self.model_name, cache_dir=self.model_path).to(self.device)
         self.lang_detector = LanguageDetector(self.data)
         self.lang_lists = self.lang_detector.detect_language()
 
     def _get_phd_single(self, text, solver):
-        inputs = self.tokenizer(preprocess_text(text), truncation=True, max_length=512, return_tensors="pt")
+        inputs = self.tokenizer(preprocess_text(text), truncation=True, max_length=512, return_tensors="pt").to(self.device)
         with torch.no_grad():
             outp = self.model(**inputs)
     
@@ -84,11 +86,11 @@ class IntrinsicDimensionEstimator():
         mn_points = self.min_subsample
         step = ( mx_points - mn_points ) // self.intermediate_points
         
-        return solver.fit_transform(outp[0][0].numpy()[1:-1],  min_points=mn_points, max_points=mx_points - step, \
+        return solver.fit_transform(outp[0][0].cpu().numpy()[1:-1],  min_points=mn_points, max_points=mx_points - step, \
                                     point_jump=step)
     
     def _get_phd_single_multi_ling(self, text, solver):
-        inputs = self.lang_detector.tokenizer(preprocess_text(text), truncation=True, max_length=512, return_tensors="pt")
+        inputs = self.lang_detector.tokenizer(preprocess_text(text), truncation=True, max_length=512, return_tensors="pt").to(self.device)
         with torch.no_grad():
             outp = self.lang_detector.model(**inputs)
     
@@ -98,7 +100,7 @@ class IntrinsicDimensionEstimator():
         mn_points = self.min_subsample
         step = ( mx_points - mn_points ) // self.intermediate_points
         
-        return solver.fit_transform(outp[0][0].numpy()[1:-1],  min_points=mn_points, max_points=mx_points - step, \
+        return solver.fit_transform(outp[0][0].cpu().numpy()[1:-1],  min_points=mn_points, max_points=mx_points - step, \
                                     point_jump=step)
 
     def get_phd(self):
@@ -113,18 +115,18 @@ class IntrinsicDimensionEstimator():
         return np.array(dims).reshape(-1, 1)
 
     def _get_mle_single(self, text, solver):
-        inputs = self.tokenizer(preprocess_text(text), truncation=True, max_length=512, return_tensors="pt")
+        inputs = self.tokenizer(preprocess_text(text), truncation=True, max_length=512, return_tensors="pt").to(self.device)
         with torch.no_grad():
             outp = self.model(**inputs)
 
-        return solver.fit_transform(outp[0][0].numpy()[1:-1])
+        return solver.fit_transform(outp[0][0].cpu().numpy()[1:-1])
 
     def _get_mle_single_multi_ling(self, text, solver):
-        inputs = self.lang_detector.tokenizer(preprocess_text(text), truncation=True, max_length=512, return_tensors="pt")
+        inputs = self.lang_detector.tokenizer(preprocess_text(text), truncation=True, max_length=512, return_tensors="pt").to(self.device)
         with torch.no_grad():
             outp = self.lang_detector.model(**inputs)
 
-        return solver.fit_transform(outp[0][0].numpy()[1:-1])
+        return solver.fit_transform(outp[0][0].cpu().numpy()[1:-1])
 
     def get_mle(self):
         dims = []

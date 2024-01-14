@@ -12,6 +12,13 @@ from common.ghostbusters_featurize import normalize, t_featurize_logprobs, score
 from common.ghostbusters_symbolic import train_trigram, get_words, vec_functions, scalar_functions
 from models.intrinsic_dim_estimator import IntrinsicDimensionEstimator
 
+if torch.cuda.is_available():
+    print("Using CUDA...")
+    device = torch.device("cuda")
+else:
+    print("Using CPU...")
+    device = torch.device("cpu")
+
 # Load davinci tokenizer
 enc = tiktoken.encoding_for_model("davinci")
 gb_features = open("models/gb_features_all.txt").read().strip().split("\n")
@@ -28,9 +35,9 @@ else:
         open(trigram_model_path, "rb"), pickle.HIGHEST_PROTOCOL)
 
 tokenizer_gpt2 = GPT2Tokenizer.from_pretrained("gpt2")
-model_gpt2 = GPT2LMHeadModel.from_pretrained("gpt2")
+model_gpt2 = GPT2LMHeadModel.from_pretrained("gpt2").to(device)
 db_model_name = "distilbert-base-multilingual-cased"
-db_model = AutoModelForMaskedLM.from_pretrained(db_model_name)
+db_model = AutoModelForMaskedLM.from_pretrained(db_model_name).to(device)
 
 def gb_mle_combined(data: str, gb_features = gb_features):
     
@@ -43,7 +50,7 @@ def gb_mle_combined(data: str, gb_features = gb_features):
     trigram = np.array(score_ngram(data, trigram_model, enc.encode, n=3, strip_first=False))
     unigram = np.array(score_ngram(data, trigram_model.base, enc.encode, n=1, strip_first=False))
 
-    tokens = tokenizer_gpt2(data, return_tensors="pt", max_length=MAX_TOKENS, truncation=True)
+    tokens = tokenizer_gpt2(data, return_tensors="pt", max_length=MAX_TOKENS, truncation=True).to(device)
     
     # Get GPT2 log probs
     with torch.no_grad():
@@ -103,7 +110,7 @@ def gb_mle_combined(data: str, gb_features = gb_features):
                 exp_features.append(scalar_functions[exp_tokens[i]](curr))
                 break
 
-    text_dim_estimator = IntrinsicDimensionEstimator(data)
+    text_dim_estimator = IntrinsicDimensionEstimator(data, device = device)
     mle_value = np.array(text_dim_estimator.get_mle())
 
 
@@ -123,7 +130,7 @@ def gb_mle_combined_file(file, gb_features = gb_features):
     trigram = np.array(score_ngram(data, trigram_model, enc.encode, n=3, strip_first=False))
     unigram = np.array(score_ngram(data, trigram_model.base, enc.encode, n=1, strip_first=False))
 
-    tokens = tokenizer_gpt2(data, return_tensors="pt", max_length=MAX_TOKENS, truncation=True)
+    tokens = tokenizer_gpt2(data, return_tensors="pt", max_length=MAX_TOKENS, truncation=True).to(device)
     
     # Get GPT2 log probs
     with torch.no_grad():
@@ -183,9 +190,8 @@ def gb_mle_combined_file(file, gb_features = gb_features):
                 exp_features.append(scalar_functions[exp_tokens[i]](curr))
                 break
 
-    text_dim_estimator = IntrinsicDimensionEstimator(data)
+    text_dim_estimator = IntrinsicDimensionEstimator(data, device = device)
     mle_value = np.array(text_dim_estimator.get_mle())
-
 
     combined_features = np.array(t_features + exp_features + mle_value)
 
@@ -200,7 +206,7 @@ def get_intrinsic_mle_file(file):
         tokens = enc.encode(data)[:MAX_TOKENS]
         data = enc.decode(tokens).strip()
 
-    text_dim_estimator = IntrinsicDimensionEstimator(data)
+    text_dim_estimator = IntrinsicDimensionEstimator(data, device = device)
     mle_features = np.array(text_dim_estimator.get_mle())
 
     return mle_features
