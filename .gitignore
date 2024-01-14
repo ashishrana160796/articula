@@ -7,6 +7,8 @@ t_data*
 
 # data and pre-trained/trained models ignored for being committed into the repository
 data/informaticup-test-dataset/*
+data/generated*
+data/toefl91
 pre-trained-models/*
 trained-models/*
 data/intrinsic-dim-dataset/*
