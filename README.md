@@ -40,6 +40,48 @@ python trainer/ghostbuster-train.py --model_name "logistic" --combined
 python app/text_app.py --input "your text"
 ```
 
+
+## 1. Dataset
+The experimentation utilizes the bensvmark datasets employed by previous state-of-the-art (sota) models. In this project, a custom model was trained on a subset of images extracted from all these models, creating a diverse dataset.
+
+## 2. Ensemble Setup
+We adopted an ensemble setup for our experimentation. The models can be trained using the following command:
+```
+cd trainer
+python img-train.py --name test --dataroot [your data path] --detect_method [CNNSpot, FreDect, Fusing, Gram] --blur_prob 0.1 --blur_sig 0.0,3.0 --jpg_prob 0.1 --jpg_method cv2,pil --jpg_qual 30,100  
+```
+
+Alternatively, already trained models are available at this drive
+
+## 3. Training the Ensemble Setup
+The ensemble setup utilizes CNNSpot, FreDect, Fusing, and Gram models. Once the pretrained models are ready and placed under the weights folder, run the following to train the ensemble meta_model:
+```
+cd trainer
+python ensemble-train.py
+```
+## 4.Testing Model
+Testing the model can be done using the following script:
+
+```
+cd evaluator
+python ensemble_prediction_pipeline.py
+```
+Note: For running all these scripts and understanding the arguments for training/testing the model, refer to the file common/img_options.py and the config file evaluator/configs/img_eval_config.py.
+
+### Testing with Spoofing
+
+Multiple strategies are experimented with, such as Gaussian attack, salt and pepper noise attack, and frequency edits. These can be experimented with using the same ensemble_prediction_pipeline.py file by changing the options. For example:
+```
+python ensemble_prediction_pipeline.py --gaussian_noise --gaus_intensity 5
+python ensemble_prediction_pipeline.py --salt_pepper_noise --s_p_density 0.1
+python ensemble_prediction_pipeline.py --freq --freq_prob 0.1
+```
+same can be run using the following script
+```
+cd evaluator/eval_different_attacks.sh
+./eval_different_attacks.sh
+````
+=======
 ### Pull Request Instructions
 
 1. Create a specific branch named in the format like `feature/intrinsic-dimension-model`, highlighting the name of the feature model in progress and make a pull request.

@@ -1,0 +1,307 @@
+python image_evaluator.py --model_path ../weights/classifier/CNNSpot.pth --detect_method CNNSpot --noise_type jpg
+python image_evaluator.py --model_path ../weights/classifier/Gram.pth --detect_method Gram --noise_type jpg
+python image_evaluator.py --model_path ../weights/classifier/PSM.pth --detect_method Fusing --noise_type jpg
+python image_evaluator.py --model_path ../weights/classifier/DCTAnalysis.pth --detect_method FreDect --noise_type jpg
+python image_evaluator.py --model_path ../weights/classifier/LGrad.pth --detect_method LGrad --noise_type jpg
+python image_evaluator.py --model_path ../weights/classifier/LNP.pth --detect_method LNP --noise_type jpg
+python image_evaluator.py --model_path ../weights/classifier/DIRE.pth --detect_method DIRE --noise_type jpg
+
+
+----------------- Options ---------------
+                 CropSize: 224                           
+           DIRE_modelpath: weights/lsun_bedroom.pt       
+          LGrad_modelpath: ./weights/preprocessing/karras2019stylegan-bedrooms-256x256_discriminator.pth
+            LNP_modelpath: ./weights/preprocessing/sidd_rgb.pth
+               batch_size: 64                            
+                 blur_sig: 1.0                           
+            detect_method: CNNSpot                       
+                  isTrain: False                                [default: None]
+                    isVal: False                                [default: None]
+               jpg_method: pil                           
+                 jpg_qual: 95                            
+                 loadSize: 256                           
+               model_path: ../weights/classifier/CNNSpot.pth    [default: ./weights/classifier/CNNSpot.pth]
+                  no_crop: False                         
+                  no_flip: False                         
+                no_resize: False                         
+               noise_type: jpg                                  [default: None]
+              results_dir: ./results/CNNSpot                    [default: None]
+                rz_interp: bilinear                      
+----------------- End -------------------
+CNNSpot model testing on...
+(subset_2) acc: 0.5767692307692308; ap: 0.6885673826809994
+(progan) acc: 0.999625; ap: 0.9999983816870702
+(stylegan) acc: 0.7298447671507261; ap: 0.9848008791210812
+(biggan) acc: 0.6205; ap: 0.8835613246725531
+(cyclegan) acc: 0.831566994700984; ap: 0.960787858755104
+(stargan) acc: 0.7926463231615808; ap: 0.9362663767267101
+(gaugan) acc: 0.6989; ap: 0.9553062333534594
+(stylegan2) acc: 0.7016775162744117; ap: 0.9797453230019586
+(whichfaceisreal) acc: 0.7575; ap: 0.8316035851296263
+(DALLE2) acc: 0.4865; ap: 0.4162661615958094
+(Midjourney) acc: 0.5338333333333334; ap: 0.6110788013718691
+(ADM) acc: 0.5036666666666667; ap: 0.5827574112712784
+
+----------------- Options ---------------
+                 CropSize: 224                           
+           DIRE_modelpath: weights/lsun_bedroom.pt       
+          LGrad_modelpath: ./weights/preprocessing/karras2019stylegan-bedrooms-256x256_discriminator.pth
+            LNP_modelpath: ./weights/preprocessing/sidd_rgb.pth
+               batch_size: 64                            
+                 blur_sig: 1.0                           
+            detect_method: Gram                                 [default: CNNSpot]
+                  isTrain: False                                [default: None]
+                    isVal: False                                [default: None]
+               jpg_method: pil                           
+                 jpg_qual: 95                            
+                 loadSize: 256                           
+               model_path: ../weights/classifier/Gram.pth       [default: ./weights/classifier/CNNSpot.pth]
+                  no_crop: False                         
+                  no_flip: False                         
+                no_resize: False                         
+               noise_type: jpg                                  [default: None]
+              results_dir: ./results/Gram                       [default: None]
+                rz_interp: bilinear                      
+----------------- End -------------------
+Gram model testing on...
+(subset_2) acc: 0.5010769230769231; ap: 0.5121450132019498
+(progan) acc: 0.53875; ap: 0.721071381655121
+(stylegan) acc: 0.556835252879319; ap: 0.7678527390947135
+(biggan) acc: 0.50825; ap: 0.5036441602220376
+(cyclegan) acc: 0.5567751703255109; ap: 0.5824037729902911
+(stargan) acc: 0.5097548774387194; ap: 0.8291375773989655
+(gaugan) acc: 0.488; ap: 0.4891916300484083
+(stylegan2) acc: 0.5317976965448172; ap: 0.7416751983213307
+(whichfaceisreal) acc: 0.5115; ap: 0.5109945750940885
+(DALLE2) acc: 0.127; ap: 0.3115283159233003
+(Midjourney) acc: 0.6701666666666667; ap: 0.6809668637517304
+(ADM) acc: 0.3724166666666667; ap: 0.3865695619028741
+
+----------------- Options ---------------
+                 CropSize: 224                           
+           DIRE_modelpath: weights/lsun_bedroom.pt       
+          LGrad_modelpath: ./weights/preprocessing/karras2019stylegan-bedrooms-256x256_discriminator.pth
+            LNP_modelpath: ./weights/preprocessing/sidd_rgb.pth
+               batch_size: 64                            
+                 blur_sig: 1.0                           
+            detect_method: Fusing                               [default: CNNSpot]
+                  isTrain: False                                [default: None]
+                    isVal: False                                [default: None]
+               jpg_method: pil                           
+                 jpg_qual: 95                            
+                 loadSize: 256                           
+               model_path: ../weights/classifier/PSM.pth        [default: ./weights/classifier/CNNSpot.pth]
+                  no_crop: False                         
+                  no_flip: False                         
+                no_resize: False                         
+               noise_type: jpg                                  [default: None]
+              results_dir: ./results/Fusing                     [default: None]
+                rz_interp: bilinear                      
+----------------- End -------------------
+PSM model testing on...
+(subset_2) acc: 0.5721923076923077; ap: 0.7891681529070101
+(progan) acc: 0.996375; ap: 0.9999898655052344
+(stylegan) acc: 0.7044733767317644; ap: 0.986183641773848
+(biggan) acc: 0.635; ap: 0.9139674792326311
+(cyclegan) acc: 0.8096139288417865; ap: 0.9713617895433468
+(stargan) acc: 0.9202101050525263; ap: 0.9929024495212663
+(gaugan) acc: 0.669; ap: 0.9669341154450315
+(stylegan2) acc: 0.6019028542814221; ap: 0.9826406178465679
+(whichfaceisreal) acc: 0.6025; ap: 0.9528789977042701
+(DALLE2) acc: 0.5; ap: 0.5497831701451468
+(Midjourney) acc: 0.5084166666666666; ap: 0.7498880152781395
+(ADM) acc: 0.50325; ap: 0.6682669109718964
+
+----------------- Options ---------------
+                 CropSize: 224                           
+           DIRE_modelpath: weights/lsun_bedroom.pt       
+          LGrad_modelpath: ./weights/preprocessing/karras2019stylegan-bedrooms-256x256_discriminator.pth
+            LNP_modelpath: ./weights/preprocessing/sidd_rgb.pth
+               batch_size: 64                            
+                 blur_sig: 1.0                           
+            detect_method: FreDect                              [default: CNNSpot]
+                  isTrain: False                                [default: None]
+                    isVal: False                                [default: None]
+               jpg_method: pil                           
+                 jpg_qual: 95                            
+                 loadSize: 256                           
+               model_path: ../weights/classifier/DCTAnalysis.pth        [default: ./weights/classifier/CNNSpot.pth]
+                  no_crop: False                         
+                  no_flip: False                         
+                no_resize: False                         
+               noise_type: jpg                                  [default: None]
+              results_dir: ./results/FreDect                    [default: None]
+                rz_interp: bilinear                      
+----------------- End -------------------
+DCTAnalysis model testing on...
+(subset_2) acc: 0.6398076923076923; ap: 0.7471218366064505
+(progan) acc: 0.844; ap: 0.9544821723711744
+(stylegan) acc: 0.7230011684192956; ap: 0.7965303622512133
+(biggan) acc: 0.629; ap: 0.6980843042014767
+(cyclegan) acc: 0.7134746404239213; ap: 0.8242179445602876
+(stargan) acc: 0.8379189594797398; ap: 0.9436776059297856
+(gaugan) acc: 0.6499; ap: 0.687595011539442
+batch number 244/250
+(stylegan2) acc: 0.7334126189283926; ap: 0.8248490322173455
+(whichfaceisreal) acc: 0.488; ap: 0.5064419387761635
+(DALLE2) acc: 0.827; ap: 0.9857239257981805
+(Midjourney) acc: 0.5665; ap: 0.7259431610571947
+(ADM) acc: 0.677; ap: 0.8714882513423081
+
+----------------- Options ---------------
+                 CropSize: 224                           
+           DIRE_modelpath: ../weights/lsun_bedroom.pt    
+          LGrad_modelpath: ../weights/preprocessing/karras2019stylegan-bedrooms-256x256_discriminator.pth
+            LNP_modelpath: ../weights/preprocessing/sidd_rgb.pth
+               batch_size: 64                            
+                 blur_sig: 1.0                           
+            detect_method: LGrad                                [default: CNNSpot]
+                  isTrain: False                                [default: None]
+                    isVal: False                                [default: None]
+               jpg_method: pil                           
+                 jpg_qual: 95                            
+                 loadSize: 256                           
+               model_path: ../weights/classifier/LGrad.pth      [default: ./weights/classifier/CNNSpot.pth]
+                  no_crop: False                         
+                  no_flip: False                         
+                no_resize: False                         
+               noise_type: jpg                                  [default: None]
+              results_dir: ./results/LGrad                      [default: None]
+                rz_interp: bilinear                      
+----------------- End -------------------
+LGrad model testing on...
+(subset_2) acc: 0.5076538461538461; ap: 0.517499639509051
+
+CNNSpot + Gram + PSM  (Subset_2) - 2 layer Meta Model
+
+CNNSpot model testing on...
+Gram model testing on...
+PSM model testing on...
+Ensemble Accuracy: 0.6281538461538462
+Ensemble Average Precision: 0.7391839915873883
+
+CNNSpot + Gram + PSM + DCTAnalysis (Subset_1) - 2 layer Meta Model
+
+----------------- Options ---------------
+                 CropSize: 224                           
+           DIRE_modelpath: ../weights/lsun_bedroom.pt    
+          LGrad_modelpath: ../weights/preprocessing/karras2019stylegan-bedrooms-256x256_discriminator.pth
+            LNP_modelpath: ../weights/preprocessing/sidd_rgb.pth
+               batch_size: 64                            
+                 blur_sig: 1.0                           
+            detect_method: CNNSpot                       
+                  isTrain: False                                [default: None]
+                    isVal: False                                [default: None]
+               jpg_method: pil                           
+                 jpg_qual: 95                            
+                 loadSize: 256                           
+               model_path: ./weights/classifier/CNNSpot.pth
+                  no_crop: False                         
+                  no_flip: False                         
+                no_resize: False                         
+               noise_type: None                          
+              results_dir: ./results/CNNSpot                    [default: None]
+                rz_interp: bilinear                      
+----------------- End -------------------
+CNNSpot model testing on...
+Gram model testing on...
+PSM model testing on...
+DCTAnalysis model testing on...
+Ensemble Accuracy: 0.7259845801208585
+Ensemble Average Precision: 0.810248522190246
+
+CNNSpot + Gram + PSM + DCTAnalysis (Subset_2) - 2 layer Meta Model
+
+Ensemble Results
+
++----------------+----------------------+-------------------------------+
+| Dataset        |  Accuracy            |  Average Precision            |
++----------------+----------------------+-------------------------------+
+| subset_2       | 0.7259845801208585   | 0.810248522190246             |
+| progan         | 0.94675              | 0.9999999375156212            |
+| stylegan       | 0.8382573860791187   | 0.9721218530585785            |
+| biggan         | 0.67725              | 0.8839400829179718            |
+| cyclegan       | 0.8266464799394398   | 0.9704933148833912            |
+| stargan        | 0.7031015507753877   | 0.9940422791212516            |
+| gaugan         | 0.7418               | 0.9021201719779772            |
+| stylegan2      | 0.8511517275913871   | 0.9493906132450056            |
+| whichfaceisreal| 0.7915               | 0.9005928884453889            |
+| DALLE2         | 0.881                | 0.8975296382629555            |
+| Midjourney     | 0.6625               | 0.7791929215421511            |
+| ADM            | 0.7483333333333333   | 0.8093903725341711            |
++----------------+----------------------+-------------------------------+
+
+CNNSpot 
++------------------+----------+-----------------------------+
+| Dataset          | Accuracy | Average Precision           |
++------------------+----------+-----------------------------+
+| subset_2         | 0.5768   | 0.6886                      |
+| progan           | 0.9996   | 0.9999984                   |
+| stylegan         | 0.7298   | 0.9848                      |
+| biggan           | 0.6205   | 0.8836                      |
+| cyclegan         | 0.8316   | 0.9608                      |
+| stargan          | 0.7926   | 0.9363                      |
+| gaugan           | 0.6989   | 0.9553                      |
+| stylegan2        | 0.7017   | 0.9797                      |
+| whichfaceisreal  | 0.7575   | 0.8316                      |
+| DALLE2           | 0.4865   | 0.4163                      |
+| Midjourney       | 0.5338   | 0.6111                      |
+| ADM              | 0.5037   | 0.5828                      |
++------------------+----------+-----------------------------+
+
+Gram
++------------------+----------+-----------------------------+
+| Dataset          | Accuracy | Average Precision           |
++------------------+----------+-----------------------------+
+| subset_2         | 0.5011   | 0.5121                      |
+| progan           | 0.5388   | 0.7211                      |
+| stylegan         | 0.5568   | 0.7679                      |
+| biggan           | 0.5083   | 0.5036                      |
+| cyclegan         | 0.5568   | 0.5824                      |
+| stargan          | 0.5098   | 0.8291                      |
+| gaugan           | 0.488    | 0.4892                      |
+| stylegan2        | 0.5318   | 0.7417                      |
+| whichfaceisreal  | 0.5115   | 0.5110                      |
+| DALLE2           | 0.127    | 0.3115                      |
+| Midjourney       | 0.6702   | 0.6810                      |
+| ADM              | 0.3724   | 0.3866                      |
++------------------+----------+-----------------------------+
+
+PSM
+
++------------------+----------+-----------------------------+
+| Dataset          | Accuracy | Average Precision           |
++------------------+----------+-----------------------------+
+| subset_2         | 0.5722   | 0.7892                      |
+| progan           | 0.9964   | 0.9999899                   |
+| stylegan         | 0.7045   | 0.9862                      |
+| biggan           | 0.635    | 0.9140                      |
+| cyclegan         | 0.8096   | 0.9714                      |
+| stargan          | 0.9202   | 0.9929                      |
+| gaugan           | 0.669    | 0.9669                      |
+| stylegan2        | 0.6019   | 0.9826                      |
+| whichfaceisreal  | 0.6025   | 0.9529                      |
+| DALLE2           | 0.5      | 0.5498                      |
+| Midjourney       | 0.5084   | 0.7499                      |
+| ADM              | 0.5033   | 0.6683                      |
++------------------+----------+-----------------------------+
+
+
+DCT
+
++------------------+----------+-----------------------------+
+| Dataset          | Accuracy | Average Precision           |
++------------------+----------+-----------------------------+
+| subset_2         | 0.6398   | 0.7471                      |
+| progan           | 0.844    | 0.9545                      |
+| stylegan         | 0.723    | 0.7965                      |
+| biggan           | 0.629    | 0.6981                      |
+| cyclegan         | 0.7135   | 0.8242                      |
+| stargan          | 0.8379   | 0.9437                      |
+| gaugan           | 0.6499   | 0.6876                      |
+| stylegan2        | 0.7334   | 0.8248                      |
+| whichfaceisreal  | 0.488    | 0.5064                      |
+| DALLE2           | 0.827    | 0.9857                      |
+| Midjourney       | 0.5665   | 0.7259                      |
+| ADM              | 0.677    | 0.8715                      |
++------------------+----------+-----------------------------+
