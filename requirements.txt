@@ -26,3 +26,4 @@ tiktoken
 tabulate
 dill
 nltk
+PyQt5
