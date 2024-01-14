@@ -23,3 +23,28 @@ git push origin feature/intrinsic-dimension-model --force-with-lease
 3. Finally, after reviewing the pull request, please `squash` all the commits during the merge into the main branch. Also, add in meaningful PR heading and joint-commit message for all your intermediate commits.
 
 __Note:__ Please, do not push directly onto the main branch, follow the proposed conventions, and also add another person as reviewer of your code.
+
+### Training and Testing the text detector
+
+1. Extract the zip folders.
+2. Generate the log probability files required for the training data.
+```
+python common/ghostbusters_generate.py --logprobs
+python common/ghostbusters_generate.py --logprob_other
+```
+3. Generate the symbolic data which will be used to perform feature selection
+```
+python trainer/ghostbuster_feature_selection.py --generate_symbolic_data
+```
+4. Perform Feature Selection
+```
+python trainer/ghostbuster_feature_selection.py --perform_feature_selection
+```
+5. Train the classifier (Logistic, XGBoost or Random Forest)
+```
+python trainer/ghostbuster-train.py --model_name "logistic" --combined
+```
+6. Use the app/text_app.py to test and spoof
+```
+python app/text_app.py --input "your text"
+```
