@@ -39,9 +39,27 @@ def validate_PSM(model, data_loader):
             y_true.extend(label.flatten().tolist())
     return y_true, y_pred
 
+def validate_PSM_single_image(model, input_img, cropped_img, scale):
+    with torch.no_grad():
+        input_img = input_img.unsqueeze(0)  # Add a batch dimension
+        cropped_img = cropped_img.unsqueeze(0)  # Add a batch dimension
+        scale = scale.unsqueeze(0)  # Add a batch dimension
+
+        input_img = input_img.cuda()
+        cropped_img = cropped_img.cuda()
+        scale = scale.cuda()
+
+        logits = model(input_img, cropped_img, scale)
+        y_pred = logits.sigmoid().item()
+
+    return y_pred
+    
 def predict_single_image(model, opt, img_path, label):
+    if opt.detect_method == "Fusing":
+        return 
     img = Image.open(img_path).convert('RGB')
     img = custom_augment(img, opt)
+    print(opt.detect_method)
     img, target = process_img(img, opt, img_path, label)
     in_tens = img.unsqueeze(0).cuda()
     y_pred = model(in_tens).sigmoid().flatten().tolist()

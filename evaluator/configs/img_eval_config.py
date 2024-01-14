@@ -12,8 +12,8 @@ from img_utils import mkdir
 dataroot = '../data'
 
 # list of synthesis algorithms
-vals = ['progan']
-        # , 'stylegan', 'biggan', 'cyclegan', 'stargan', 'gaugan', 'stylegan2', 'whichfaceisreal','DALLE2', 'Midjourney', 'ADM']
+vals = ['subset_small']
+# ['progan', 'stylegan', 'biggan', 'cyclegan', 'stargan', 'gaugan', 'stylegan2', 'whichfaceisreal','DALLE2', 'Midjourney', 'ADM']
 # 'progan', 'stylegan', 'biggan', 'cyclegan', 'stargan', 'gaugan',
 #         'stylegan2', 'whichfaceisreal',
 #         'ADM','Glide','Midjourney','stable_diffusion_v_1_4','stable_diffusion_v_1_5','VQDM','wukong',

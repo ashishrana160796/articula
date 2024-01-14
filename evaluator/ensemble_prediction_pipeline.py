@@ -112,7 +112,7 @@ def main():
         meta_model = MetaModel(input_size=len(model_paths), hidden_size1=hidden_size1, hidden_size2=hidden_size2, dropout_rate=dropout_rate)
         
         # Load pre-trained meta-model weights
-        meta_model.load_state_dict(torch.load('../results/ensemble/meta_model.pth', map_location='cuda'))
+        meta_model.load_state_dict(torch.load('../models/meta_model_2_layers.pth', map_location='cuda'))
         meta_model.eval()
         
         # Use pre-trained meta-model for predictions
