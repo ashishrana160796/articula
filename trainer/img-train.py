@@ -13,11 +13,12 @@ sys.path.append(current_directory + '/../models')
 sys.path.append(current_directory + '/../common')
 sys.path.append(current_directory + '/../data')
 sys.path.append(current_directory + '/../evaluator/configs/')
+
 from img_validate import validate
 from data import create_dataloader_new,create_dataloader
 from earlystop import EarlyStopping
 from trainer import Trainer
-from options import TrainOptions
+from img_options import TrainOptions
 from process import get_processing_model
 from img_utils import set_random_seed
 
