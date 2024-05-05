@@ -85,14 +85,6 @@ class VGG(torch.nn.Module):
         return out
 
 
-
-
-
-
-
-
-
-
 def vgg11(pretrained=False, progress=True):
     r"""VGG 11-layer model (configuration "A") from
     `"Very Deep Convolutional Networks For Large-Scale Image Recognition" <https://arxiv.org/pdf/1409.1556.pdf>`_.
@@ -114,7 +106,3 @@ def vgg19(pretrained=False, progress=True):
         progress (bool): If True, displays a progress bar of the download to stderr
     """
     return VGG('vgg19', pretrained, progress)
-
-
-
-
