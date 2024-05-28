@@ -105,7 +105,3 @@ def vgg19(pretrained=False, progress=True):
         progress (bool): If True, displays a progress bar of the download to stderr
     """
     return VGG('vgg19', pretrained, progress)
-
-
-
-
